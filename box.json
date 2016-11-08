@@ -22,7 +22,7 @@
   "compression": "GZ",
   "output": "carbon14-@git-version@.phar",
   "replacements": {
-    "@version@": "@git-version@"
+    "@git-version@": "@git-version@"
   },
   "stub": true
 }
