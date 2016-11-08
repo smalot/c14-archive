@@ -42,35 +42,61 @@ class UpdateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $currentVersion = $this->getApplication()->getVersion();
+
         $updater = new Updater(null, false);
         $updater->setStrategy(Updater::STRATEGY_GITHUB);
         $updater->getStrategy()->setPackageName('smalot/carbon14');
         $updater->getStrategy()->setPharName('carbon14.phar');
-        $updater->getStrategy()->setCurrentLocalVersion($this->getApplication()->getVersion());
-        $updater->getStrategy()->setStability('any');
+        $updater->getStrategy()->setCurrentLocalVersion($currentVersion);
+        $updater->getStrategy()->setStability('stable');
 
         try {
             if ($input->getOption('check-only')) {
                 $result = $updater->hasUpdate();
 
                 if ($result) {
-                    echo(sprintf(
-                      'The current stable build available remotely is: %s',
-                      $updater->getNewVersion()
-                    ));
+                    $output->writeln(
+                      sprintf(
+                        '<comment>The current stable build available remotely is %s.</comment>',
+                        $updater->getNewVersion()
+                      )
+                    );
                 } elseif (false === $updater->getNewVersion()) {
-                    echo('There are no stable builds available.');
+                    $output->writeln('<error>There are no stable builds available.</error>');
                 } else {
-                    echo('You have the current stable build installed.');
+                    $output->writeln(
+                      sprintf(
+                        '<info>You are already using composer version %s.</info>',
+                        $updater->getNewVersion()
+                      )
+                    );
                 }
 
                 return;
             } else {
                 $result = $updater->update();
-                $result ? exit('Updated!') : exit('No update needed!');
+
+                if ($result) {
+                    $new = $updater->getNewVersion();
+                    $old = $updater->getOldVersion();
+
+                    $output->writeln(
+                      sprintf(
+                        '<info>Successfully updated from %s to %s.</info>',
+                        $old,
+                        $new
+                      )
+                    );
+                } else {
+                    $output->writeln(
+                      sprintf('<info>You are already using composer version %s.</info>', $updater->getNewVersion())
+                    );
+                }
             }
         } catch (\Exception $e) {
-            exit('Well, something happened! Either an oopsie or something involving hackers.');
+            $output->writeln('<error>Oups, something happened!</error>');
+            exit(1);
         }
     }
 }
