@@ -1,0 +1,28 @@
+{
+  "alias": "carbon14.phar",
+  "chmod": "0755",
+  "directories": [
+    "bin",
+    "src"
+  ],
+  "files": [
+    "LICENSE"
+  ],
+  "finder": [
+    {
+      "in": "vendor",
+      "name": ["*.php", "*.xml", "*.xsd", "*.yml", "*.json"],
+      "exclude": ["Tests", ".git"]
+    }
+  ],
+  "git-commit": "git-commit",
+  "git-version": "git-version",
+  "main": "bin/console",
+  "algorithm": "SHA512",
+  "compression": "GZ",
+  "output": "carbon14-@git-version@.phar",
+  "replacements": {
+    "@version@": "@git-version@"
+  },
+  "stub": true
+}
