@@ -41,7 +41,7 @@ class DeleteCommand extends Command
     {
         $this
           ->setName('safe:delete')
-          ->setDescription('Delete a safe (with its archives)')
+          ->setDescription('Delete a safe (archives included)')
           ->addArgument('uuid', InputArgument::REQUIRED, 'The identifier of the safe')
           ->addOption('confirm', null, InputOption::VALUE_REQUIRED, 'Confirm (y/n)')
           ->setHelp('')

@@ -37,7 +37,7 @@ class ListCommand extends Command
     {
         $this
           ->setName('safe:list')
-          ->setDescription('List all safes')
+          ->setDescription('Get a list of the user\' sages')
           ->setHelp('');
     }
 
