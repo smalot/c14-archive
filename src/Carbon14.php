@@ -56,6 +56,8 @@ class Carbon14 extends Application
           new Command\CronCommand(),
           new Command\UpdateCommand(),
           new Command\Job\ListCommand(),
+          new Command\Archive\ListCommand(),
+          new Command\Archive\JobListCommand(),
           new Command\Safe\CreateCommand(),
           new Command\Safe\DeleteCommand(),
           new Command\Safe\ListCommand(),
