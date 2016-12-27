@@ -1,19 +1,21 @@
 <?php
 
-namespace Carbon14\Command\Safe;
+namespace Carbon14\Command\Archive\Key;
 
 use Carbon14\Carbon14;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class ListCommand
- * @package Carbon14\Command\Safe
+ * Class GetCommand
+ * @package Carbon14\Command\Archive\Key
  */
-class ListCommand extends Command
+class GetCommand extends Command
 {
     /**
      * @var Online
@@ -36,9 +38,12 @@ class ListCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('safe:list')
-          ->setDescription('List all safes')
-          ->setHelp('');
+          ->setName('archive:key:get')
+          ->setDescription('Get an archive\'s encryption key')
+          ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
+          ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
+          ->setHelp('')
+        ;
     }
 
     /**
@@ -55,27 +60,21 @@ class ListCommand extends Command
         $settings = $application->getSettings();
         $token = $settings['token'];
 
-        $selected = !empty($settings['default']['safe']) ? $settings['default']['safe'] : '';
+        $safe_uuid = $input->getOption('safe');
+        if (empty($safe_uuid)) {
+            $safe_uuid = $settings['default']['safe'];
+        }
+
+        if (empty($safe_uuid)) {
+            throw new \InvalidArgumentException('Missing safe uuid');
+        }
+
+        $archive_uuid = $input->getArgument('archive');
 
         // Authenticate and list all safe.
         $this->online->setToken($token);
-        $safeList = $this->online->storageC14()->getSafeList();
+        $key = $this->online->storageC14()->getKey($safe_uuid, $archive_uuid);
 
-        $rows = array();
-        foreach ($safeList as $safe) {
-            $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
-
-            $rows[] = array(
-              $safe['uuid_ref'],
-              $safe['name'],
-              $safe['description'],
-              $safe['status'],
-              preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
-              $selected == $safe['uuid_ref'] ? '*' : '',
-            );
-        }
-
-        $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'status', 'locked', 'selected'), $rows);
+        $output->writeln($key);
     }
 }

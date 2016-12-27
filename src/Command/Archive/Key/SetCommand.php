@@ -1,6 +1,6 @@
 <?php
 
-namespace Carbon14\Command\Archive;
+namespace Carbon14\Command\Archive\Key;
 
 use Carbon14\Carbon14;
 use Smalot\Online\Online;
@@ -12,10 +12,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class ListCommand
- * @package Carbon14\Command\Archive
+ * Class SetCommand
+ * @package Carbon14\Command\Archive\Key
  */
-class ListCommand extends Command
+class SetCommand extends Command
 {
     /**
      * @var Online
@@ -38,8 +38,10 @@ class ListCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('archive:list')
-          ->setDescription('List all archives')
+          ->setName('archive:key:set')
+          ->setDescription('Set an archive\'s encryption key')
+          ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
+          ->addArgument('key', InputArgument::REQUIRED, 'The content of the key')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
           ->setHelp('')
         ;
@@ -68,32 +70,13 @@ class ListCommand extends Command
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
+        $archive_uuid = $input->getArgument('archive');
+        $key = $input->getArgument('key');
+
         // Authenticate and list all safe.
         $this->online->setToken($token);
-        $archiveList = $this->online->storageC14()->getArchiveList($safe_uuid);
+        $this->online->storageC14()->enterKey($safe_uuid, $archive_uuid, $key);
 
-        $rows = array();
-        foreach ($archiveList as $archive) {
-            $archive = $this->online->storageC14()->getArchiveDetails($safe_uuid, $archive['uuid_ref']);
-            $created = new \DateTime($archive['creation_date']);
-
-            $bucket = $archive['bucket'];
-            $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime($archive['bucket']['archival_date']) : null;
-
-            $rows[] = array(
-              $archive['uuid_ref'],
-              $archive['name'],
-              $archive['description'],
-              $archive['parity'],
-              $created->format('Y-m-d H:i:s'),
-              $bucket['status'],
-              ($archival ? $archival->format('Y-m-d H:i:s') : ''),
-              $archive['status'],
-              preg_match('/locked/mis', $archive['description']) ? 'yes' : 'no',
-            );
-        }
-
-        $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'parity', 'created', 'bucket', 'archival', 'status', 'locked'), $rows);
+        $output->writeln('<info>Archive\'s encryption key successfully updated</info>');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Carbon14\Command\Archive;
+namespace Carbon14\Command\Archive\Key;
 
 use Carbon14\Carbon14;
 use Smalot\Online\Online;
@@ -12,10 +12,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class JobListCommand
- * @package Carbon14\Command\Archive
+ * Class DeleteCommand
+ * @package Carbon14\Command\Archive\Key
  */
-class JobListCommand extends Command
+class DeleteCommand extends Command
 {
     /**
      * @var Online
@@ -38,11 +38,10 @@ class JobListCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('archive:job:list')
-          ->setDescription('List all jobs of an archive')
-          ->addArgument('archive', null, InputArgument::REQUIRED, 'Referring archive')
+          ->setName('archive:key:delete')
+          ->setDescription('Delete an archive\'s encryption key')
+          ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
           ->setHelp('')
         ;
     }
@@ -72,33 +71,10 @@ class JobListCommand extends Command
 
         $archive_uuid = $input->getArgument('archive');
 
+        // Authenticate and list all safe.
         $this->online->setToken($token);
-        $jobs = $this->online->storageC14()->getJobList($safe_uuid, $archive_uuid);
+        $this->online->storageC14()->deleteKey($safe_uuid, $archive_uuid);
 
-        if ($input->getOption('reverse')) {
-            $jobs = array_reverse($jobs);
-        }
-
-        $rows = array();
-        foreach ($jobs as $job) {
-            $started = new \DateTime($job['start']);
-            $ended = !empty($job['end']) ? new \DateTime($job['end']) : null;
-            if ($ended) {
-                $duration = $ended->getTimestamp() - $started->getTimestamp();
-            }
-
-            $rows[] = array(
-              $job['uuid_ref'],
-              (isset($job['parent_job']) ? '- ':'') .str_replace('_', ' ', $job['type']),
-              $started->format('Y-m-d H:i:s'),
-              ($ended ? $ended->format('Y-m-d H:i:s') : ''),
-              $job['progress'].'%',
-              ($ended ? $duration.'s' : '-'),
-              $job['status'],
-            );
-        }
-
-        $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'), $rows);
+        $output->writeln('<info>Archive\'s encryption key successfully deleted</info>');
     }
 }

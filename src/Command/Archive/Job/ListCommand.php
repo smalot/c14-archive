@@ -1,6 +1,6 @@
 <?php
 
-namespace Carbon14\Command\Archive;
+namespace Carbon14\Command\Archive\Job;
 
 use Carbon14\Carbon14;
 use Smalot\Online\Online;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class ListCommand
- * @package Carbon14\Command\Archive
+ * @package Carbon14\Command\Archive\Job
  */
 class ListCommand extends Command
 {
@@ -38,9 +38,11 @@ class ListCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('archive:list')
-          ->setDescription('List all archives')
+          ->setName('archive:job:list')
+          ->setDescription('List all jobs of an archive')
+          ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
+          ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
           ->setHelp('')
         ;
     }
@@ -68,32 +70,35 @@ class ListCommand extends Command
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
-        // Authenticate and list all safe.
+        $archive_uuid = $input->getArgument('archive');
+
         $this->online->setToken($token);
-        $archiveList = $this->online->storageC14()->getArchiveList($safe_uuid);
+        $jobs = $this->online->storageC14()->getJobList($safe_uuid, $archive_uuid);
+
+        if ($input->getOption('reverse')) {
+            $jobs = array_reverse($jobs);
+        }
 
         $rows = array();
-        foreach ($archiveList as $archive) {
-            $archive = $this->online->storageC14()->getArchiveDetails($safe_uuid, $archive['uuid_ref']);
-            $created = new \DateTime($archive['creation_date']);
-
-            $bucket = $archive['bucket'];
-            $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime($archive['bucket']['archival_date']) : null;
+        foreach ($jobs as $job) {
+            $started = new \DateTime($job['start']);
+            if (!empty($job['end'])) {
+                $ended = new \DateTime($job['end']);
+                $duration = $ended->getTimestamp() - $started->getTimestamp();
+            }
 
             $rows[] = array(
-              $archive['uuid_ref'],
-              $archive['name'],
-              $archive['description'],
-              $archive['parity'],
-              $created->format('Y-m-d H:i:s'),
-              $bucket['status'],
-              ($archival ? $archival->format('Y-m-d H:i:s') : ''),
-              $archive['status'],
-              preg_match('/locked/mis', $archive['description']) ? 'yes' : 'no',
+              $job['uuid_ref'],
+              (isset($job['parent_job']) ? '- ':'') .str_replace('_', ' ', $job['type']),
+              $started->format('Y-m-d H:i:s'),
+              (!empty($job['end']) ? $ended->format('Y-m-d H:i:s') : ''),
+              $job['progress'].'%',
+              (!empty($job['end']) ? $duration.'s' : '-'),
+              $job['status'],
             );
         }
 
         $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'parity', 'created', 'bucket', 'archival', 'status', 'locked'), $rows);
+        $io->table(array('uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'), $rows);
     }
 }
