@@ -65,7 +65,7 @@ class CreateCommand extends Command
         $this->online->setToken($token);
 
         $name = $input->getArgument('name');
-        $description = $input->getOption('description');
+        $description = $input->getOption('description') ?: 'automatically locked';
         $result = $this->online->storageC14()->createSafe($name, $description);
 
         $output->writeln('<info>Safe created</info>');

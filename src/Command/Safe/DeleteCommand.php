@@ -68,11 +68,17 @@ class DeleteCommand extends Command
         /** @var array $settings */
         $settings = $application->getSettings();
         $token = $settings['token'];
+        $uuid = $input->getArgument('uuid');
 
         // Authenticate and list all safe.
         $this->online->setToken($token);
 
-        $uuid = $input->getArgument('uuid');
+        $safe = $this->online->storageC14()->getSafeDetails($uuid);
+        if (preg_match('/locked/mis', $safe['description'])) {
+            $output->writeln("<error>Safe locked, can't be deleted</error>");
+            return;
+        }
+
         $this->online->storageC14()->deleteSafe($uuid);
 
         $output->writeln('<info>Safe deleted</info>');

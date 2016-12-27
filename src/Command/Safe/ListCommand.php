@@ -62,15 +62,18 @@ class ListCommand extends Command
 
         $rows = array();
         foreach ($safeList as $safe) {
+            $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
+
             $rows[] = array(
               $safe['uuid_ref'],
               $safe['name'],
               $safe['description'],
               $safe['status'],
+              preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
             );
         }
 
         $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'status'), $rows);
+        $io->table(array('uuid', 'label', 'description', 'status', 'locked'), $rows);
     }
 }
