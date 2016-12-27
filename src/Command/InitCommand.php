@@ -2,6 +2,7 @@
 
 namespace Carbon14\Command;
 
+use Carbon14\Carbon14;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class InitCommand
@@ -20,6 +22,11 @@ class InitCommand extends Command
      * @var Online
      */
     protected $online;
+
+    /**
+     * @var Carbon14
+     */
+    protected $application;
 
     /**
      * @var array
@@ -43,10 +50,10 @@ class InitCommand extends Command
     {
         $this
           ->setName('init')
-          ->setDescription('Init backup C14')
-          ->addOption('token', null, InputOption::VALUE_REQUIRED, '')
-          ->addOption('safe', null, InputOption::VALUE_REQUIRED, '')
-          ->addOption('duration', null, InputOption::VALUE_REQUIRED, 'Bucket window duration (2, 5 or 7), default: 7 days')
+          ->setDescription('Init Carbon14')
+          ->addOption('token', null, InputOption::VALUE_REQUIRED)
+          ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Default safe (uuid expected)')
+          ->addOption('duration', null, InputOption::VALUE_REQUIRED, 'Default bucket window duration in days (2, 5 or 7)')
           ->setHelp('');
     }
 
@@ -55,15 +62,21 @@ class InitCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        $settings = $this->getApplication()->getSettings();
+
         $helper = $this->getHelper('question');
+        $io = new SymfonyStyle($input, $output);
 
         if (!$input->getOption('token')) {
-            $question = new Question('<info>Please enter the security token: </info>', '');
+            $default = isset($settings['token']) ? $settings['token'] : '';
+            $question = new Question("<info>Please enter the security token</info> [<comment>$default</comment>]\n > ", $default);
             $question->setValidator(
               function ($answer) {
                   if (!trim($answer)) {
                       throw new \RuntimeException('The token is required');
                   }
+
+                  $this->loadSafeList($answer, true);
 
                   return $answer;
               }
@@ -72,25 +85,59 @@ class InitCommand extends Command
 
             $token = $helper->ask($input, $output, $question);
             $input->setOption('token', $token);
+
+            $io->newLine();
         }
 
         if (!$input->getOption('safe')) {
             $this->loadSafeList($input->getOption('token'));
-            $choices = $safeList = array();
+            $default_safe = isset($settings['default']['safe']) ? $settings['default']['safe'] : '';
+            $default = $position = 0;
+            $rows = array();
+
             foreach ($this->safeList as $safe) {
                 if ($safe['status'] == 'active') {
-                    $label = $safe['name'].' ('.$safe['uuid_ref'].')';
-                    $choices[] = $label;
-                    $safeList[$label] = $safe['uuid_ref'];
+                    $rows[] = array(
+                      $position,
+                      $safe['uuid_ref'],
+                      $safe['name'],
+                      $safe['description'],
+                    );
+
+                    if ($safe['uuid_ref'] == $default_safe) {
+                        $default = $position;
+                    }
+
+                    $position++;
                 }
             }
-            $default = null;
-            $question = new ChoiceQuestion('<info>Select the safe name: </info>', $choices, $default);
+
+            $io->table(array('#', 'uuid', 'label', 'description'), $rows);
+
+            $question = new Question("<info>Select the default safe name</info> [<comment>$default</comment>]\n > ", $default);
             $safe = $helper->ask($input, $output, $question);
-            $input->setOption('safe', $safeList[$safe]);
+            $input->setOption('safe', $rows[$safe][1]);
+
+            $io->newLine();
         }
 
+        if (!$input->getOption('duration')) {
+            $default = isset($settings['default']['duration']) ? $settings['default']['duration'] : 7;
+            $question = new Question("<info>Select the default duration in days (2, 5 or 7)</info> [<comment>$default</comment>]\n > ", $default);
+            $question->setValidator(
+              function ($answer) {
+                  if (!in_array($answer, array(2, 5, 7))) {
+                      throw new \RuntimeException('Invalid value.');
+                  }
+                  return $answer;
+              }
+            );
+            $question->setMaxAttempts(2);
 
+            $duration = $helper->ask($input, $output, $question);
+            $io->newLine();
+            $input->setOption('duration', $duration);
+        }
     }
 
     /**
@@ -99,20 +146,37 @@ class InitCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $token = $input->getOption('token');
-        $output->writeln('token: ' . $token);
-
         $safe = $input->getOption('safe');
-        $output->writeln('safe: ' . $safe);
+        $duration = intval($input->getOption('duration'));
+
+        // Check token if not already done.
+        $this->loadSafeList($token);
+
+        $settings = $this->application->getSettings();
+
+        // Update settings.
+        $settings['token'] = $token;
+        $settings['default']['safe'] = $safe;
+        $settings['default']['duration'] = $duration;
+
+        $this->application->setSettings($settings);
+
+        if ($this->application->saveConfig()) {
+            $output->writeln('<info>Configuration saved.</info>');
+        }
     }
 
     /**
      * @param string $token
+     * @param bool $reload
      *
      * @return void
      */
-    protected function loadSafeList($token)
+    protected function loadSafeList($token, $reload = false)
     {
-        $this->online->setToken($token);
-        $this->safeList = $this->online->storageC14()->getSafeList();
+        if (is_null($this->safeList) || $reload) {
+            $this->online->setToken($token);
+            $this->safeList = $this->online->storageC14()->getSafeList();
+        }
     }
 }

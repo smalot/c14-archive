@@ -7,5 +7,10 @@ $loader = require __DIR__.'/../vendor/autoload.php';
 //umask(0000);
 set_time_limit(0);
 
-$application = new Carbon14\Carbon14('Carbon14', '@git-version@');
+$home = getenv('HOME');
+
+$configFilename = $home . DIRECTORY_SEPARATOR . '.carbon14.yml';
+
+$application = new \Carbon14\Carbon14('Carbon14', '@git-version@');
+$application->loadConfig($configFilename);
 $application->run();

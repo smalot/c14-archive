@@ -2,8 +2,9 @@
 
 namespace Carbon14;
 
+use Carbon14\Source;
+use Carbon14\Command;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 
 /**
@@ -12,10 +13,22 @@ use Symfony\Component\Console\Input\ArgvInput;
  */
 class Carbon14 extends Application
 {
+    use TraitConfig;
+
     /**
      * @var bool
      */
     protected $debug;
+
+    /**
+     * @var Job[]
+     */
+    protected $jobs;
+
+    /**
+     * @var Source\SourceAbstract[]
+     */
+    protected $sources = array();
 
     /**
      * @inheritDoc
@@ -34,20 +47,63 @@ class Carbon14 extends Application
     }
 
     /**
-     * Gets the default commands that should always be available.
-     *
-     * @return Command[] An array of default Command instances
+     * Load default commands that should always be available.
      */
     protected function registerCommands()
     {
         $commands = array(
-          new \Carbon14\Command\InitCommand(),
-          new \Carbon14\Command\CronCommand(),
-          new \Carbon14\Command\UpdateCommand(),
-          new \Carbon14\Command\Job\ListCommand(),
+          new Command\InitCommand(),
+          new Command\CronCommand(),
+          new Command\UpdateCommand(),
+          new Command\Job\ListCommand(),
+          new Command\Safe\CreateCommand(),
+          new Command\Safe\DeleteCommand(),
+          new Command\Safe\ListCommand(),
         );
 
         $this->addCommands($commands);
+    }
+
+    /**
+     * Load default sources.
+     */
+    protected function registerSources()
+    {
+        $sources = array(
+//          new Source\Direct(),
+//          new Source\Mysql(),
+//          new Source\Postgresql(),
+//          new Source\Tarball(),
+        );
+
+        $this->addSources($sources);
+    }
+
+    /**
+     * @param Source\SourceAbstract[] $sources
+     */
+    protected function addSources($sources)
+    {
+        /** @var Source\SourceAbstract $source */
+        foreach ($sources as $source) {
+            $this->addSource($source);
+        }
+    }
+
+    /**
+     * @param Source\SourceAbstract $source
+     */
+    protected function addSource(Source\SourceAbstract $source)
+    {
+        $this->sources[$source->getName()] = $source;
+    }
+
+    /**
+     * @return Job[]
+     */
+    public function getJobs()
+    {
+        return $this->jobs;
     }
 
     /**

@@ -34,7 +34,7 @@ class UpdateCommand extends Command
         $this
           ->setName('self-update')
           ->addOption('check-only', null, InputOption::VALUE_NONE, '')
-          ->setDescription('Updates carbon14.phar to the latest version');
+          ->setDescription('Updates Carbon14 to the latest version');
     }
 
     /**
@@ -88,6 +88,8 @@ class UpdateCommand extends Command
                         $new
                       )
                     );
+
+                    exit(0);
                 } else {
                     $output->writeln(
                       sprintf('<info>You are already using composer version %s.</info>', $updater->getNewVersion())
