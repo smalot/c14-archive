@@ -1,6 +1,6 @@
 <?php
 
-namespace Carbon14\Command\Archive\Key;
+namespace Carbon14\Command\Archive;
 
 use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
@@ -13,10 +13,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class GetCommand
- * @package Carbon14\Command\Archive\Key
+ * Class FreezeCommand
+ * @package Carbon14\Command\Archive
  */
-class GetCommand extends Carbon14Command
+class FreezeCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -41,8 +41,8 @@ class GetCommand extends Carbon14Command
         parent::configure();
 
         $this
-          ->setName('archive:key:get')
-          ->setDescription('Get an archive\'s encryption key')
+          ->setName('archive:freeze')
+          ->setDescription('Archive files from temporary storage')
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
           ->setHelp('')
@@ -76,10 +76,9 @@ class GetCommand extends Carbon14Command
 
         $archive_uuid = $input->getArgument('archive');
 
-        // Authenticate and list all safe.
         $this->online->setToken($token);
-        $key = $this->online->storageC14()->getKey($safe_uuid, $archive_uuid);
+        $this->online->storageC14()->doArchive($safe_uuid, $archive_uuid);
 
-        $output->writeln($key);
+        $output->writeln('<info>Archive freeze successfully launched</info>');
     }
 }

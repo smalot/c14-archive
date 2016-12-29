@@ -3,6 +3,7 @@
 namespace Carbon14\Command\Archive\Key;
 
 use Carbon14\Carbon14;
+use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class SetCommand
  * @package Carbon14\Command\Archive\Key
  */
-class SetCommand extends Command
+class SetCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -37,6 +38,8 @@ class SetCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('archive:key:set')
           ->setDescription('Set an archive\'s encryption key')
@@ -55,6 +58,8 @@ class SetCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         /** @var Carbon14 $application */
         $application = $this->getApplication();
         /** @var array $settings */

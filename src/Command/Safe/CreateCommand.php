@@ -3,6 +3,7 @@
 namespace Carbon14\Command\Safe;
 
 use Carbon14\Carbon14;
+use Carbon14\Command\Carbon14Command;
 use Carbon14\Config;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class CreateCommand
  * @package Carbon14\Command\Safe
  */
-class CreateCommand extends Command
+class CreateCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -38,6 +39,8 @@ class CreateCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('safe:create')
           ->setDescription('Create a safe')
@@ -55,6 +58,8 @@ class CreateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         /** @var Carbon14 $application */
         $application = $this->getApplication();
         /** @var array $settings */

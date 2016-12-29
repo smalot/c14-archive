@@ -3,6 +3,7 @@
 namespace Carbon14\Command\Archive\Job;
 
 use Carbon14\Carbon14;
+use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class ListCommand
  * @package Carbon14\Command\Archive\Job
  */
-class ListCommand extends Command
+class ListCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -37,6 +38,8 @@ class ListCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('archive:job:list')
           ->setDescription('List all jobs of an archive')
@@ -55,6 +58,8 @@ class ListCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         /** @var Carbon14 $application */
         $application = $this->getApplication();
         /** @var array $settings */

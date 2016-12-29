@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\ArgvInput;
  */
 class Carbon14 extends Application
 {
-    use TraitConfig;
+    use TraitConfigFile;
 
     /**
      * @var bool
@@ -55,7 +55,9 @@ class Carbon14 extends Application
           new Command\InitCommand(),
           new Command\CronCommand(),
           new Command\UpdateCommand(),
+          new Command\Archive\FreezeCommand(),
           new Command\Archive\ListCommand(),
+          new Command\Archive\RestoreCommand(),
           new Command\Archive\Job\ListCommand(),
           new Command\Archive\Key\DeleteCommand(),
           new Command\Archive\Key\GetCommand(),

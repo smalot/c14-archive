@@ -1,6 +1,6 @@
 <?php
 
-namespace Carbon14\Command\Archive\Key;
+namespace Carbon14\Command\Archive;
 
 use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
@@ -13,10 +13,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class GetCommand
- * @package Carbon14\Command\Archive\Key
+ * Class RestoreCommand
+ * @package Carbon14\Command\Archive
  */
-class GetCommand extends Carbon14Command
+class RestoreCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -41,10 +41,11 @@ class GetCommand extends Carbon14Command
         parent::configure();
 
         $this
-          ->setName('archive:key:get')
-          ->setDescription('Get an archive\'s encryption key')
+          ->setName('archive:restore')
+          ->setDescription('Unarchive files into temporary storage')
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
+          ->addOption('key', null, InputOption::VALUE_REQUIRED, 'The content of the key')
           ->setHelp('')
         ;
     }
@@ -75,11 +76,18 @@ class GetCommand extends Carbon14Command
         }
 
         $archive_uuid = $input->getArgument('archive');
+        $key = $input->getOption('key');
 
-        // Authenticate and list all safe.
         $this->online->setToken($token);
-        $key = $this->online->storageC14()->getKey($safe_uuid, $archive_uuid);
 
-        $output->writeln($key);
+        $locations = $this->online->storageC14()->getLocationList($safe_uuid, $archive_uuid);
+        $location = reset($locations);
+
+        // Default protocol.
+        $protocols = ['FTP'];
+
+        $this->online->storageC14()->doUnarchive($safe_uuid, $archive_uuid, $location['uuid_ref'], true, "$key", $protocols);
+
+        $output->writeln('<info>Archive unarchive successfully launched</info>');
     }
 }

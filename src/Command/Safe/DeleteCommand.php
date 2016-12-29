@@ -3,6 +3,7 @@
 namespace Carbon14\Command\Safe;
 
 use Carbon14\Carbon14;
+use Carbon14\Command\Carbon14Command;
 use Carbon14\Config;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Command\Command;
@@ -17,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class DeleteCommand
  * @package Carbon14\Command\Safe
  */
-class DeleteCommand extends Command
+class DeleteCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -39,6 +40,8 @@ class DeleteCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('safe:delete')
           ->setDescription('Delete a safe (archives included)')
@@ -56,6 +59,8 @@ class DeleteCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         // Confirm required.
         if (strtolower($input->getOption('confirm')) != 'y') {
             $output->writeln('<comment>Operation aborted</comment>');
@@ -89,6 +94,8 @@ class DeleteCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        parent::interact($input, $output);
+
         $helper = $this->getHelper('question');
         $io = new SymfonyStyle($input, $output);
 

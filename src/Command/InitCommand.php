@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class InitCommand
  * @package Carbon14\Command
  */
-class InitCommand extends Command
+class InitCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -48,6 +48,8 @@ class InitCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('init')
           ->setDescription('Init Carbon14')
@@ -62,6 +64,8 @@ class InitCommand extends Command
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
+        parent::interact($input, $output);
+
         $settings = $this->getApplication()->getSettings();
 
         $helper = $this->getHelper('question');
@@ -145,6 +149,8 @@ class InitCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         $token = $input->getOption('token');
         $safe = $input->getOption('safe');
         $duration = intval($input->getOption('duration'));
@@ -152,16 +158,16 @@ class InitCommand extends Command
         // Check token if not already done.
         $this->loadSafeList($token);
 
-        $settings = $this->application->getSettings();
+        $settings = $this->getApplication()->getSettings();
 
         // Update settings.
         $settings['token'] = $token;
         $settings['default']['safe'] = $safe;
         $settings['default']['duration'] = $duration;
 
-        $this->application->setSettings($settings);
+        $this->getApplication()->setSettings($settings);
 
-        if ($this->application->saveConfig()) {
+        if ($this->getApplication()->saveConfigFile()) {
             $output->writeln('<info>Configuration saved.</info>');
         }
     }

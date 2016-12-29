@@ -10,13 +10,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Class CronCommand
  * @package Carbon14\Command
  */
-class CronCommand extends Command
+class CronCommand extends Carbon14Command
 {
     /**
      *
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
           ->setName('cron')
           ->setDescription('Cron process')
@@ -32,6 +34,8 @@ class CronCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        parent::execute($input, $output);
+
         // ...
     }
 }
