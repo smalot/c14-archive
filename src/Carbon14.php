@@ -6,6 +6,7 @@ use Carbon14\Source;
 use Carbon14\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Class Carbon14
@@ -19,6 +20,11 @@ class Carbon14 extends Application
      * @var bool
      */
     protected $debug;
+
+    /**
+     * @var EventDispatcher
+     */
+    protected $eventDispatcher;
 
     /**
      * @var Job[]
@@ -44,6 +50,8 @@ class Carbon14 extends Application
         parent::__construct($name, $version);
 
         $this->registerCommands();
+
+        $this->eventDispatcher = new EventDispatcher();
     }
 
     /**
@@ -118,5 +126,13 @@ class Carbon14 extends Application
     public function isDebug()
     {
         return $this->debug;
+    }
+
+    /**
+     * @return \Symfony\Component\EventDispatcher\EventDispatcher
+     */
+    public function getEventDispatcher()
+    {
+        return $this->eventDispatcher;
     }
 }

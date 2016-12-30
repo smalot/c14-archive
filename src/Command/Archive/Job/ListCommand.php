@@ -87,9 +87,10 @@ class ListCommand extends Carbon14Command
         $rows = array();
         foreach ($jobs as $job) {
             $started = new \DateTime($job['start']);
+            $duration = 0;
             if (!empty($job['end'])) {
                 $ended = new \DateTime($job['end']);
-                $duration = $ended->getTimestamp() - $started->getTimestamp();
+                $duration = max(0, $ended->getTimestamp() - $started->getTimestamp());
             }
 
             $rows[] = array(
@@ -98,7 +99,7 @@ class ListCommand extends Carbon14Command
               $started->format('Y-m-d H:i:s'),
               (!empty($job['end']) ? $ended->format('Y-m-d H:i:s') : ''),
               $job['progress'].'%',
-              (!empty($job['end']) ? $duration.'s' : '-'),
+              ($duration ? $duration.'s' : '-'),
               $job['status'],
             );
         }
