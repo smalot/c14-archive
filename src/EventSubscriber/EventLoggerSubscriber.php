@@ -31,6 +31,7 @@ class EventLoggerSubscriber implements EventSubscriberInterface
     public function __construct(OutputInterface $output)
     {
         $this->output = $output;
+        $this->progress = new ProgressBar($this->output);
     }
 
     /**
@@ -53,7 +54,7 @@ class EventLoggerSubscriber implements EventSubscriberInterface
      */
     public function onTransferSkipped(TransferEvent $event)
     {
-        $this->output->writeln('Transfer skipped');
+        $this->output->writeln('<comment>Transfer skipped: </comment>'.$event->getFile()->getFilename());
     }
 
     /**
@@ -61,9 +62,9 @@ class EventLoggerSubscriber implements EventSubscriberInterface
      */
     public function onTransferStarted(TransferEvent $event)
     {
-        $this->output->writeln('Transferring: '.$event->getFile()->getFilename());
-        $this->progress = new ProgressBar($this->output, $event->getFile()->getFilesize());
-        $this->progress->start();
+        $this->output->writeln('<info>Transferring:</info> '.$event->getFile()->getFilename());
+        $this->progress->start($event->getFile()->getSize());
+        $this->progress->setRedrawFrequency($this->progress->getMaxSteps() / 1000);
     }
 
     /**
@@ -71,9 +72,9 @@ class EventLoggerSubscriber implements EventSubscriberInterface
      */
     public function onTransferResume(TransferProgressEvent $event)
     {
-        $this->output->writeln('Transferring: '.$event->getFile()->getFilename());
-        $this->progress = new ProgressBar($this->output, $event->getFile()->getFilesize());
-        $this->progress->start();
+        $this->output->writeln('<info>Transferring:</info> '.$event->getFile()->getFilename());
+        $this->progress->start($event->getFile()->getSize());
+        $this->progress->setRedrawFrequency($this->progress->getMaxSteps() / 1000);
     }
 
     /**

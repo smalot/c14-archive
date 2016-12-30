@@ -6,6 +6,7 @@ use Carbon14\EventSubscriber\EventLoggerSubscriber;
 use Carbon14\Model\File;
 use Carbon14\Model\FileCollection;
 use Carbon14\Protocol\Ftp;
+use Carbon14\Source\Direct;
 use GuzzleHttp\Exception\ClientException;
 use Smalot\Online\Online;
 use Smalot\Online\OnlineException;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Class CronCommand
@@ -45,6 +47,7 @@ class CronCommand extends Carbon14Command
         $this
           ->setName('cron')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
+          ->addOption('no-resume', null, InputOption::VALUE_NONE, 'Disable auto-resume')
           ->setDescription('Cron process')
           ->setHelp('');
     }
@@ -94,27 +97,34 @@ class CronCommand extends Carbon14Command
 
         $bucket = $this->online->storageC14()->getBucketDetails($safe_uuid, $archive['uuid_ref']);
 
-        $fileCollection = new FileCollection();
+        $source = new Direct([]);
+
+        $finder = new Finder();
+        $finder->files()->in('/data/www/carbon14/src');
+
+        $source->addFiles($finder);
+
+//        $source->findFiles();
 //        $file = new File('/data/isos/debian-8.3.0-amd64-netinst (1).iso');
-//        $fileCollection->attach($file);
-        $file = new File('/data/solr/LICENSE.txt');
-        $fileCollection->attach($file);
+//        $source->addFile($file);
+//        $file = new File('/data/solr/LICENSE.txt');
+//        $source->addFile($file);
 
         /** @var EventDispatcher $eventDispatcher */
         $eventDispatcher = $this->getApplication()->getEventDispatcher();
         $eventLogger = new EventLoggerSubscriber($output);
-//        $eventDispatcher->addSubscriber($eventLogger);
+        $eventDispatcher->addSubscriber($eventLogger);
 
         foreach ($bucket['credentials'] as $credential) {
             if ($credential['protocol'] == 'ftp') {
                 $protocol = new Ftp($eventDispatcher);
                 $protocol->connect($credential);
-                $protocol->transfertFiles($fileCollection, false);
+                $protocol->transfertFiles($source->getFileCollection(), !$input->getOption('no-resume'));
                 $protocol->close();
             }
         }
 
-        echo 'done'.PHP_EOL;
+        $output->writeln('done');
     }
 
     /**

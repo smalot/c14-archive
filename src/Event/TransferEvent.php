@@ -26,7 +26,7 @@ class TransferEvent extends Event
     }
 
     /**
-     * @return \Carbon14\Model\File
+     * @return File
      */
     public function getFile()
     {

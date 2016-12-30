@@ -86,11 +86,15 @@ class Ftp
      */
     public function transferFile(File $file, $resume = true)
     {
-        $handle = fopen($file->getFilenamePath(), 'r');
+        $handle = fopen($file->getRealPath(), 'r');
+
+        ftp_chdir($this->connection, DIRECTORY_SEPARATOR);
+        $this->createDirectories($file->getRelativePath());
+        ftp_chdir($this->connection, DIRECTORY_SEPARATOR . $file->getRelativePath());
 
         // Resume transfer.
         if (($offset = ftp_size($this->connection, $file->getFilename())) > 0 && $resume) {
-            if ($offset == $file->getFilesize()) {
+            if ($offset == $file->getSize()) {
                 $event = new TransferEvent($file);
                 $this->eventDispatcher->dispatch(Events::TRANSFER_SKIPPED, $event);
 
@@ -127,6 +131,29 @@ class Ftp
         $this->eventDispatcher->dispatch(Events::TRANSFER_FINISHED, $event);
 
         return $this;
+    }
+
+    /**
+     * @param string $path
+     * @return bool
+     */
+    protected function createDirectories($path)
+    {
+        // Nothing to do.
+        if (!$path) {
+            return false;
+        }
+
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+
+        foreach ($parts as $part) {
+            if (!@ftp_chdir($this->connection, $part)) {
+                ftp_mkdir($this->connection, $part);
+                ftp_chdir($this->connection, $part);
+            }
+        }
+
+        return true;
     }
 
     /**

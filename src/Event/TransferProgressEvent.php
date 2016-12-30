@@ -9,13 +9,8 @@ use Symfony\Component\EventDispatcher\Event;
  * Class TransferProgressEvent
  * @package Carbon14\Event
  */
-class TransferProgressEvent extends Event
+class TransferProgressEvent extends TransferEvent
 {
-    /**
-     * @var File
-     */
-    protected $file;
-
     /**
      * @var int
      */
@@ -28,16 +23,9 @@ class TransferProgressEvent extends Event
      */
     public function __construct(File $file, $progress)
     {
-        $this->file = $file;
-        $this->progress = $progress;
-    }
+        parent::__construct($file);
 
-    /**
-     * @return \Carbon14\Model\File
-     */
-    public function getFile()
-    {
-        return $this->file;
+        $this->progress = $progress;
     }
 
     /**
