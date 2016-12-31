@@ -21,11 +21,12 @@ class File extends SplFileInfo
      */
     public function __construct($file)
     {
-        if (is_string($file)) {
-            parent::__construct($file, '', basename($file));
-        } elseif ($file instanceof SplFileInfo) {
+        if ($file instanceof SplFileInfo) {
             parent::__construct($file->getRealPath(), $file->getRelativePath(), $file->getRelativePathname());
-            $file->getSize();
+        } elseif (is_string($file)) {
+            parent::__construct($file, '', basename($file));
+        } else {
+            throw new \InvalidArgumentException('Not supported');
         }
 
         $this->md5 = md5_file($this->getRealPath());

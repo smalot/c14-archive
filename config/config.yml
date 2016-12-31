@@ -1,0 +1,13 @@
+imports:
+    - { resource: 'sources.yml' }
+    - { resource: 'protocols.yml' }
+
+services:
+    event_dispatcher:
+        class: Symfony\Component\EventDispatcher\EventDispatcher
+
+    source_manager:
+        class: Carbon14\Manager\SourceManager
+
+    protocol_manager:
+        class: Carbon14\Manager\ProtocolManager

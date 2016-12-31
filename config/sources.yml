@@ -1,0 +1,20 @@
+services:
+    source.direct:
+        class: Carbon14\Source\Direct
+        tags:
+          - { name: carbon14.source, type: direct }
+
+    source.mysql:
+        class: Carbon14\Source\Mysql
+        tags:
+          - { name: carbon14.source, type: mysql }
+
+    source.postgresql:
+        class: Carbon14\Source\Postgresql
+        tags:
+          - { name: carbon14.source, type: postgresql }
+
+    source.tarball:
+        class: Carbon14\Source\Tarball
+        tags:
+          - { name: carbon14.source, type: tarball }

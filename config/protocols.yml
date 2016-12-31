@@ -1,0 +1,7 @@
+services:
+    protocol.ftp:
+        class: Carbon14\Protocol\Ftp
+        arguments:
+          - "@event_dispatcher"
+        tags:
+          - { name: carbon14.protocol, type: ftp }

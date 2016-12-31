@@ -9,12 +9,10 @@ namespace Carbon14\Source;
 class Tarball extends SourceAbstract
 {
     /**
-     * Tarball constructor.
-     *
-     * @param array $settings
+     * @inheritDoc
      */
-    public function __construct(array $settings)
+    public function run(array $settings)
     {
-        parent::__construct('tarball', $settings);
+        // TODO: Implement run() method.
     }
 }

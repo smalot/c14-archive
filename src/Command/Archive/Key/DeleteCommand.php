@@ -45,8 +45,7 @@ class DeleteCommand extends Carbon14Command
           ->setDescription('Delete an archive\'s encryption key')
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**

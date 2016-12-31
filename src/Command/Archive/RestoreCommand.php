@@ -46,8 +46,7 @@ class RestoreCommand extends Carbon14Command
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
           ->addOption('key', null, InputOption::VALUE_REQUIRED, 'The content of the key')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**
@@ -86,7 +85,14 @@ class RestoreCommand extends Carbon14Command
         // Default protocol.
         $protocols = ['FTP'];
 
-        $this->online->storageC14()->doUnarchive($safe_uuid, $archive_uuid, $location['uuid_ref'], true, "$key", $protocols);
+        $this->online->storageC14()->doUnarchive(
+          $safe_uuid,
+          $archive_uuid,
+          $location['uuid_ref'],
+          true,
+          "$key",
+          $protocols
+        );
 
         $output->writeln('<info>Archive unarchive successfully launched</info>');
     }

@@ -45,8 +45,7 @@ class FreezeCommand extends Carbon14Command
           ->setDescription('Archive files from temporary storage')
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**

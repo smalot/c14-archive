@@ -3,18 +3,15 @@
 namespace Carbon14\Command;
 
 use Carbon14\EventSubscriber\EventLoggerSubscriber;
-use Carbon14\Model\File;
-use Carbon14\Model\FileCollection;
-use Carbon14\Protocol\Ftp;
-use Carbon14\Source\Direct;
-use GuzzleHttp\Exception\ClientException;
+use Carbon14\Manager\ProtocolManager;
+use Carbon14\Manager\SourceManager;
+use Carbon14\Protocol\ProtocolAbstract;
 use Smalot\Online\Online;
 use Smalot\Online\OnlineException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Finder\Finder;
 
 /**
  * Class CronCommand
@@ -47,7 +44,8 @@ class CronCommand extends Carbon14Command
         $this
           ->setName('cron')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->addOption('no-resume', null, InputOption::VALUE_NONE, 'Disable auto-resume')
+          ->addOption('override', null, InputOption::VALUE_NONE, 'Override remote file if already exists')
+          ->addOption('no-resume', null, InputOption::VALUE_NONE, 'Disable auto-resume on aborted transfer')
           ->setDescription('Cron process')
           ->setHelp('');
     }
@@ -55,8 +53,8 @@ class CronCommand extends Carbon14Command
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     *
      * @return void
+     * @throws
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -65,76 +63,87 @@ class CronCommand extends Carbon14Command
         $settings = $this->getApplication()->getSettings();
         $this->online->setToken($settings['token']);
 
-        $safe_uuid = $input->getOption('safe');
-        if (empty($safe_uuid)) {
-            $safe_uuid = $settings['default']['safe'];
+        $safeUuid = $input->getOption('safe');
+        if (empty($safeUuid)) {
+            $safeUuid = $settings['default']['safe'];
         }
 
-        if (empty($safe_uuid)) {
+        if (empty($safeUuid)) {
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
-        $archive = $this->findArchive($safe_uuid);
+        $archive = $this->findArchive($safeUuid);
 
         if (!$archive) {
             $duration = isset($settings['default']['duration']) ? $settings['default']['duration'] : 7;
 
-            $archive_uuid = $this->createArchive($safe_uuid, $duration);
-            $output->writeln('Archive created: ' . $archive_uuid);
+            $archiveUuid = $this->createArchive($safeUuid, $duration);
+            $output->writeln('Archive created: '.$archiveUuid);
 
             $start = microtime(true);
-            $archive = $this->waitForActiveArchive($safe_uuid, $archive_uuid);
+            $archive = $this->waitForActiveArchive($safeUuid, $archiveUuid);
             $output->writeln('Archive available after '.round(microtime(true) - $start).' seconds');
 
             if (!$archive) {
                 $output->writeln('<error>Unable to find or create an archive</error>');
+
                 return;
             }
 
         } else {
-            $output->writeln('Archive found: ' . $archive['uuid_ref']);
+            $output->writeln('Archive found: '.$archive['uuid_ref']);
         }
 
-        $bucket = $this->online->storageC14()->getBucketDetails($safe_uuid, $archive['uuid_ref']);
-
-        $source = new Direct([]);
-
-        $finder = new Finder();
-        $finder->files()->in('/data/www/carbon14/src');
-
-        $source->addFiles($finder);
-
-//        $source->findFiles();
-//        $file = new File('/data/isos/debian-8.3.0-amd64-netinst (1).iso');
-//        $source->addFile($file);
-//        $file = new File('/data/solr/LICENSE.txt');
-//        $source->addFile($file);
-
         /** @var EventDispatcher $eventDispatcher */
-        $eventDispatcher = $this->getApplication()->getEventDispatcher();
+        $eventDispatcher = $this->get('event_dispatcher');
+        // Register progress bar.
         $eventLogger = new EventLoggerSubscriber($output);
         $eventDispatcher->addSubscriber($eventLogger);
 
+        /** @var SourceManager $sourceManager */
+        $sourceManager = $this->get('source_manager');
+        $source = $sourceManager->get($settings['job']['source']['type']);
+        $source->run($settings['job']['source']['settings']);
+
+        $output->writeln('Found '.$source->getFileCollection()->count().' file(s)');
+
+        $bucket = $this->online->storageC14()->getBucketDetails($safeUuid, $archive['uuid_ref']);
+
+        /** @var ProtocolManager $protocolManager */
+        $protocolManager = $this->get('protocol_manager');
+
+        $credentials = [];
         foreach ($bucket['credentials'] as $credential) {
-            if ($credential['protocol'] == 'ftp') {
-                $protocol = new Ftp($eventDispatcher);
-                $protocol->connect($credential);
-                $protocol->transfertFiles($source->getFileCollection(), !$input->getOption('no-resume'));
-                $protocol->close();
-            }
+            $credentials[$credential['protocol']] = $credential;
         }
 
-        $output->writeln('done');
+        if (isset($credentials['ftp'])) {
+            $protocolType = 'ftp';
+        } else {
+            throw new \Exception('Protocol not supported');
+        }
+
+        /** @var ProtocolAbstract $protocol */
+        $protocol = $protocolManager->get($protocolType);
+        $protocol->open($credentials[$protocolType]);
+        $protocol->transferFiles(
+          $source->getFileCollection(),
+          $input->getOption('override'),
+          !$input->getOption('no-resume')
+        );
+        $protocol->close();
+
+        $output->writeln('Job done');
     }
 
     /**
-     * @param string $safe_uuid
+     * @param string $safeUuid
      * @return array|false
      * @throws \Exception
      */
-    protected function findArchive($safe_uuid)
+    protected function findArchive($safeUuid)
     {
-        $archives = $this->online->storageC14()->getArchiveList($safe_uuid);
+        $archives = $this->online->storageC14()->getArchiveList($safeUuid);
 
         // If found, return its ID.
         foreach ($archives as $archive) {
@@ -148,7 +157,7 @@ class CronCommand extends Carbon14Command
 
                 // In the last 7 days.
                 if (time() - $created < (7 * 86400)) {
-                    $archive = $this->online->storageC14()->getArchiveDetails($safe_uuid, $archive['uuid_ref']);
+                    $archive = $this->online->storageC14()->getArchiveDetails($safeUuid, $archive['uuid_ref']);
 
                     if (isset($archive['bucket']['status']) && $archive['bucket']['status'] == 'active') {
                         return $archive;
@@ -161,12 +170,12 @@ class CronCommand extends Carbon14Command
     }
 
     /**
-     * @param string $safe_uuid
+     * @param string $safeUuid
      * @param int $duration
      * @return string|false
      * @throws OnlineException
      */
-    protected function createArchive($safe_uuid, $duration)
+    protected function createArchive($safeUuid, $duration)
     {
         // If not found, so create it.
         $date = (date('N') == 1 ? time() : strtotime('previous monday'));
@@ -175,16 +184,16 @@ class CronCommand extends Carbon14Command
 
         $platforms = $this->online->storageC14()->getPlatformList();
         $platform = reset($platforms);
-        $archive_uuid = false;
-
+        $archiveUuid = false;
         $tries = 0;
+
         do {
             try {
                 $again = false;
                 $tmp_name = $tries ? $name.' ('.$tries.')' : $name;
 
-                $archive_uuid = $this->online->storageC14()->createArchive(
-                  $safe_uuid,
+                $archiveUuid = $this->online->storageC14()->createArchive(
+                  $safeUuid,
                   $tmp_name,
                   $description,
                   null,
@@ -202,16 +211,16 @@ class CronCommand extends Carbon14Command
             }
         } while ($again);
 
-        return $archive_uuid;
+        return $archiveUuid;
     }
 
     /**
-     * @param string $safe_uuid
-     * @param string $archive_uuid
+     * @param string $safeUuid
+     * @param string $archiveUuid
      * @return array|false
      * @throws \Exception
      */
-    protected function waitForActiveArchive($safe_uuid, $archive_uuid)
+    protected function waitForActiveArchive($safeUuid, $archiveUuid)
     {
         // Wait for archive ready, up to 1 minute.
         $tries = 0;
@@ -219,7 +228,7 @@ class CronCommand extends Carbon14Command
             sleep(1);
             $ready = false;
 
-            $archive = $this->online->storageC14()->getArchiveDetails($safe_uuid, $archive_uuid);
+            $archive = $this->online->storageC14()->getArchiveDetails($safeUuid, $archiveUuid);
 
             if ($archive['status'] == 'active') {
                 // Available.

@@ -9,12 +9,10 @@ namespace Carbon14\Source;
 class Postgresql extends SourceAbstract
 {
     /**
-     * Postgresql constructor.
-     *
-     * @param array $settings
+     * @inheritDoc
      */
-    public function __construct(array $settings)
+    public function run(array $settings)
     {
-        parent::__construct('pgsql', $settings);
+        // TODO: Implement run() method.
     }
 }

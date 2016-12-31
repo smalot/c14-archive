@@ -46,8 +46,7 @@ class CreateCommand extends Carbon14Command
           ->setDescription('Create a safe')
           ->addArgument('name', InputArgument::REQUIRED, 'Safe name to create')
           ->addOption('description', null, InputOption::VALUE_REQUIRED, 'Description')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**

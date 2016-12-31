@@ -46,8 +46,7 @@ class ListCommand extends Carbon14Command
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
           ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**
@@ -95,7 +94,7 @@ class ListCommand extends Carbon14Command
 
             $rows[] = array(
               $job['uuid_ref'],
-              (isset($job['parent_job']) ? '- ':'') .str_replace('_', ' ', $job['type']),
+              (isset($job['parent_job']) ? '- ' : '').str_replace('_', ' ', $job['type']),
               $started->format('Y-m-d H:i:s'),
               (!empty($job['end']) ? $ended->format('Y-m-d H:i:s') : ''),
               $job['progress'].'%',

@@ -44,8 +44,7 @@ class ListCommand extends Carbon14Command
           ->setName('archive:list')
           ->setDescription('List all archives')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**
@@ -83,7 +82,9 @@ class ListCommand extends Carbon14Command
             $created = new \DateTime($archive['creation_date']);
 
             $bucket = $archive['bucket'];
-            $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime($archive['bucket']['archival_date']) : null;
+            $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime(
+              $archive['bucket']['archival_date']
+            ) : null;
 
             $rows[] = array(
               $archive['uuid_ref'],
@@ -99,6 +100,9 @@ class ListCommand extends Carbon14Command
         }
 
         $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'parity', 'created', 'bucket', 'archival', 'status', 'locked'), $rows);
+        $io->table(
+          array('uuid', 'label', 'description', 'parity', 'created', 'bucket', 'archival', 'status', 'locked'),
+          $rows
+        );
     }
 }

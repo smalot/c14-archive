@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  * Class Ftp
  * @package Carbon14\Protocol
  */
-class Ftp
+class Ftp extends ProtocolAbstract
 {
     /**
      * @var EventDispatcher
@@ -43,13 +43,15 @@ class Ftp
     }
 
     /**
-     * @param array $credential
-     * @return $this
-     * @throws \Exception
+     * @inheritdoc
      */
-    public function connect(array $credential)
+    public function open(array $credential)
     {
-        if (!$this->connection = ftp_connect(parse_url($credential['uri'], PHP_URL_HOST), parse_url($credential['uri'], PHP_URL_PORT))) {
+        if (!$this->connection = ftp_connect(
+          parse_url($credential['uri'], PHP_URL_HOST),
+          parse_url($credential['uri'], PHP_URL_PORT)
+        )
+        ) {
             throw new \Exception('Fail to connect');
         }
 
@@ -63,16 +65,13 @@ class Ftp
     }
 
     /**
-     * @param FileCollection $fileCollection
-     * @param bool $resume
-     * @return $this
-     * @throws \Exception
+     * @inheritdoc
      */
-    public function transfertFiles(FileCollection $fileCollection, $resume = true)
+    public function transferFiles(FileCollection $fileCollection, $override = true, $resume = true)
     {
         /** @var File $file */
         foreach ($fileCollection as $file) {
-            $this->transferFile($file, $resume);
+            $this->transferFile($file, $override, $resume);
         }
 
         return $this;
@@ -80,39 +79,49 @@ class Ftp
 
     /**
      * @param File $file
+     * @param bool $override
      * @param boolean $resume
      * @return $this
      * @throws \Exception
      */
-    public function transferFile(File $file, $resume = true)
+    public function transferFile(File $file, $override = true, $resume = true)
     {
+        // Move to remote folder and create if missing.
+        if (!ftp_chdir($this->connection, DIRECTORY_SEPARATOR.$file->getRelativePath())) {
+            ftp_chdir($this->connection, DIRECTORY_SEPARATOR);
+            $this->createDirectories($file->getRelativePath());
+        }
+
+        // If already on remote server.
+        if (!$override && ($size = ftp_size($this->connection, $file->getFilename())) > 0) {
+            $event = new TransferEvent($file);
+            $this->eventDispatcher->dispatch(Events::TRANSFER_SKIPPED, $event);
+
+            return $this;
+        }
+
+        $tmpFilename = $file->getFilename().'.tmp';
         $handle = fopen($file->getRealPath(), 'r');
 
-        ftp_chdir($this->connection, DIRECTORY_SEPARATOR);
-        $this->createDirectories($file->getRelativePath());
-        ftp_chdir($this->connection, DIRECTORY_SEPARATOR . $file->getRelativePath());
-
         // Resume transfer.
-        if (($offset = ftp_size($this->connection, $file->getFilename())) > 0 && $resume) {
-            if ($offset == $file->getSize()) {
-                $event = new TransferEvent($file);
-                $this->eventDispatcher->dispatch(Events::TRANSFER_SKIPPED, $event);
-
-                return $this;
+        if ($resume && ($offset = ftp_size($this->connection, $tmpFilename)) > 0) {
+            if ($offset >= $file->getSize()) {
+                $offset = 0;
             }
 
             fseek($handle, $offset);
-            $ret = ftp_nb_fput($this->connection, $file->getFilename(), $handle, FTP_BINARY, $offset);
+            $ret = ftp_nb_fput($this->connection, $tmpFilename, $handle, FTP_BINARY, $offset);
 
             $event = new TransferProgressEvent($file, $offset);
             $this->eventDispatcher->dispatch(Events::TRANSFER_RESUME, $event);
         } else {
-            $ret = ftp_nb_fput($this->connection, $file->getFilename(), $handle, FTP_BINARY);
+            $ret = ftp_nb_fput($this->connection, $tmpFilename, $handle, FTP_BINARY);
 
             $event = new TransferEvent($file);
             $this->eventDispatcher->dispatch(Events::TRANSFER_STARTED, $event);
         }
 
+        // Loop to transfer content.
         while ($ret == FTP_MOREDATA) {
             $event = new TransferProgressEvent($file, ftell($handle));
             $this->eventDispatcher->dispatch(Events::TRANSFER_PROGRESS, $event);
@@ -120,11 +129,14 @@ class Ftp
             $ret = ftp_nb_continue($this->connection);
         }
 
+        // On ended transfer, check result.
         if ($ret != FTP_FINISHED) {
             $event = new TransferEvent($file);
             $this->eventDispatcher->dispatch(Events::TRANSFER_ERROR, $event);
 
             throw new \Exception('Error on file transfer');
+        } else {
+            ftp_rename($this->connection, $tmpFilename, $file->getFilename());
         }
 
         $event = new TransferEvent($file);
@@ -157,7 +169,7 @@ class Ftp
     }
 
     /**
-     * @return $this
+     * @inheritdoc
      */
     public function close()
     {

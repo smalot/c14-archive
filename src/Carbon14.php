@@ -2,11 +2,18 @@
 
 namespace Carbon14;
 
+use Carbon14\DependencyInjection\Compiler\ProtocolPass;
+use Carbon14\DependencyInjection\Compiler\SourcePass;
 use Carbon14\Source;
 use Carbon14\Command;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class Carbon14
@@ -22,19 +29,9 @@ class Carbon14 extends Application
     protected $debug;
 
     /**
-     * @var EventDispatcher
+     * @var ContainerInterface
      */
-    protected $eventDispatcher;
-
-    /**
-     * @var Job[]
-     */
-    protected $jobs;
-
-    /**
-     * @var Source\SourceAbstract[]
-     */
-    protected $sources = array();
+    protected $container;
 
     /**
      * @inheritDoc
@@ -49,9 +46,49 @@ class Carbon14 extends Application
 
         parent::__construct($name, $version);
 
+        $this->loadContainer();
+        $this->setDispatcher($this->container->get('event_dispatcher'));
         $this->registerCommands();
+    }
 
-        $this->eventDispatcher = new EventDispatcher();
+    /**
+     *
+     */
+    protected function loadContainer()
+    {
+        $container = new ContainerBuilder();
+
+        // Load root config file.
+        $dir = dirname(__DIR__).DIRECTORY_SEPARATOR.'config';
+        $loader = new YamlFileLoader($container, new FileLocator($dir));
+        $loader->load('config.yml');
+
+        $container->addCompilerPass(new ProtocolPass());
+        $container->addCompilerPass(new SourcePass());
+
+        // Compile container.
+        $container->compile();
+
+        $this->setContainer($container);
+    }
+
+    /**
+     * @param ContainerInterface $container
+     * @return $this
+     */
+    public function setContainer(ContainerInterface $container)
+    {
+        $this->container = $container;
+
+        return $this;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     /**
@@ -79,60 +116,10 @@ class Carbon14 extends Application
     }
 
     /**
-     * Load default sources.
-     */
-    protected function registerSources()
-    {
-        $sources = array(
-//          new Source\Direct(),
-//          new Source\Mysql(),
-//          new Source\Postgresql(),
-//          new Source\Tarball(),
-        );
-
-        $this->addSources($sources);
-    }
-
-    /**
-     * @param Source\SourceAbstract[] $sources
-     */
-    protected function addSources($sources)
-    {
-        /** @var Source\SourceAbstract $source */
-        foreach ($sources as $source) {
-            $this->addSource($source);
-        }
-    }
-
-    /**
-     * @param Source\SourceAbstract $source
-     */
-    protected function addSource(Source\SourceAbstract $source)
-    {
-        $this->sources[$source->getName()] = $source;
-    }
-
-    /**
-     * @return Job[]
-     */
-    public function getJobs()
-    {
-        return $this->jobs;
-    }
-
-    /**
      * @return boolean
      */
     public function isDebug()
     {
         return $this->debug;
-    }
-
-    /**
-     * @return \Symfony\Component\EventDispatcher\EventDispatcher
-     */
-    public function getEventDispatcher()
-    {
-        return $this->eventDispatcher;
     }
 }

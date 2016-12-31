@@ -9,12 +9,10 @@ namespace Carbon14\Source;
 class Mysql extends SourceAbstract
 {
     /**
-     * Mysql constructor.
-     *
-     * @param array $settings
+     * @inheritDoc
      */
-    public function __construct(array $settings)
+    public function run(array $settings)
     {
-        parent::__construct('mysql', $settings);
+        // TODO: Implement run() method.
     }
 }

@@ -3,10 +3,12 @@
   "chmod": "0755",
   "directories": [
     "bin",
+    "config",
     "src"
   ],
   "files": [
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "finder": [
     {

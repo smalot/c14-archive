@@ -47,8 +47,7 @@ class DeleteCommand extends Carbon14Command
           ->setDescription('Delete a safe (archives included)')
           ->addArgument('uuid', InputArgument::REQUIRED, 'The identifier of the safe')
           ->addOption('confirm', null, InputOption::VALUE_REQUIRED, 'Confirm (y/n)')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**
@@ -81,6 +80,7 @@ class DeleteCommand extends Carbon14Command
         $safe = $this->online->storageC14()->getSafeDetails($uuid);
         if (preg_match('/locked/mis', $safe['description'])) {
             $output->writeln("<error>Safe locked, can't be deleted</error>");
+
             return;
         }
 

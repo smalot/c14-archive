@@ -55,7 +55,12 @@ class InitCommand extends Carbon14Command
           ->setDescription('Init Carbon14')
           ->addOption('token', null, InputOption::VALUE_REQUIRED)
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Default safe (uuid expected)')
-          ->addOption('duration', null, InputOption::VALUE_REQUIRED, 'Default bucket window duration in days (2, 5 or 7)')
+          ->addOption(
+            'duration',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Default bucket window duration in days (2, 5 or 7)'
+          )
           ->setHelp('');
     }
 
@@ -73,7 +78,10 @@ class InitCommand extends Carbon14Command
 
         if (!$input->getOption('token')) {
             $default = isset($settings['token']) ? $settings['token'] : '';
-            $question = new Question("<info>Please enter the security token</info> [<comment>$default</comment>]\n > ", $default);
+            $question = new Question(
+              "<info>Please enter the security token</info> [<comment>$default</comment>]\n > ",
+              $default
+            );
             $question->setValidator(
               function ($answer) {
                   if (!trim($answer)) {
@@ -118,7 +126,10 @@ class InitCommand extends Carbon14Command
 
             $io->table(array('#', 'uuid', 'label', 'description'), $rows);
 
-            $question = new Question("<info>Select the default safe name</info> [<comment>$default</comment>]\n > ", $default);
+            $question = new Question(
+              "<info>Select the default safe name</info> [<comment>$default</comment>]\n > ",
+              $default
+            );
             $safe = $helper->ask($input, $output, $question);
             $input->setOption('safe', $rows[$safe][1]);
 
@@ -127,12 +138,16 @@ class InitCommand extends Carbon14Command
 
         if (!$input->getOption('duration')) {
             $default = isset($settings['default']['duration']) ? $settings['default']['duration'] : 7;
-            $question = new Question("<info>Select the default duration in days (2, 5 or 7)</info> [<comment>$default</comment>]\n > ", $default);
+            $question = new Question(
+              "<info>Select the default duration in days (2, 5 or 7)</info> [<comment>$default</comment>]\n > ",
+              $default
+            );
             $question->setValidator(
               function ($answer) {
                   if (!in_array($answer, array(2, 5, 7))) {
                       throw new \RuntimeException('Invalid value.');
                   }
+
                   return $answer;
               }
             );

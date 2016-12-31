@@ -46,8 +46,7 @@ class SetCommand extends Carbon14Command
           ->addArgument('archive', InputArgument::REQUIRED, 'Referring archive')
           ->addArgument('key', InputArgument::REQUIRED, 'The content of the key')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->setHelp('')
-        ;
+          ->setHelp('');
     }
 
     /**
