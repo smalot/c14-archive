@@ -36,7 +36,9 @@ abstract class Carbon14Command extends Command
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->getApplication()->loadConfigFile($input->getOption('config-file'));
+        if ($input->hasOption('config-file')) {
+            $this->getApplication()->loadConfigFile($input->getOption('config-file'));
+        }
     }
 
     /**
