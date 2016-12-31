@@ -1,0 +1,101 @@
+services:
+    ##################
+    # Common
+    ##################
+
+    command.init:
+        class: Carbon14\Command\InitCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.cron:
+        class: Carbon14\Command\CronCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.update:
+        class: Carbon14\Command\UpdateCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    ##################
+    # Archive
+    ##################
+
+    command.archive_job_list:
+        class: Carbon14\Command\Archive\Job\ListCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_key_delete:
+        class: Carbon14\Command\Archive\Key\DeleteCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_key_get:
+        class: Carbon14\Command\Archive\Key\GetCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_key_set:
+        class: Carbon14\Command\Archive\Key\SetCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_freeze:
+        class: Carbon14\Command\Archive\FreezeCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_list:
+        class: Carbon14\Command\Archive\ListCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.archive_restore:
+        class: Carbon14\Command\Archive\RestoreCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    ##################
+    # Job
+    ##################
+
+    command.job_list:
+        class: Carbon14\Command\Job\ListCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    ##################
+    # Safe
+    ##################
+
+    command.safe_create:
+        class: Carbon14\Command\Safe\CreateCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.safe_delete:
+        class: Carbon14\Command\Safe\DeleteCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    command.safe_list:
+        class: Carbon14\Command\Safe\ListCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+

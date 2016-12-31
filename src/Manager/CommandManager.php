@@ -24,40 +24,42 @@
  * SOFTWARE.
  */
 
-namespace Carbon14\DependencyInjection\Compiler;
+namespace Carbon14\Manager;
 
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Console\Command\Command;
 
 /**
- * Class SourcePass
- * @package Carbon14\DependencyInjection\Compiler
+ * Class CommandManager
+ * @package Carbon14\Manager
  */
-class SourcePass implements CompilerPassInterface
+class CommandManager
 {
     /**
-     * @param ContainerBuilder $container
+     * @var array
      */
-    public function process(ContainerBuilder $container)
+    protected $commands;
+
+    /**
+     * CommandManager constructor.
+     */
+    public function __construct()
     {
-        if (!$container->has('source_manager')) {
-            return;
-        }
+        $this->commands = [];
+    }
 
-        $definition = $container->findDefinition('source_manager');
-        $taggedServices = $container->findTaggedServiceIds('carbon14.source');
+    /**
+     * @param Command $command
+     */
+    public function register(Command $command)
+    {
+        $this->commands[] = $command;
+    }
 
-        foreach ($taggedServices as $id => $tags) {
-            foreach ($tags as $attributes) {
-                $definition->addMethodCall(
-                  'register',
-                  array(
-                    $attributes['type'],
-                    new Reference($id),
-                  )
-                );
-            }
-        }
+    /**
+     * @return array
+     */
+    public function getCommands()
+    {
+        return $this->commands;
     }
 }

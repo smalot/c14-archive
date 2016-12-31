@@ -6,6 +6,6 @@
 # All PHAR files
 /*.phar
 
-.idea
-composer.lock
-
+/.idea
+/composer.lock
+/jobs

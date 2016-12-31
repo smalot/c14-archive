@@ -65,6 +65,7 @@ class ListCommand extends Carbon14Command
           ->setName('archive:list')
           ->setDescription('List all archives')
           ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
+          ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
           ->setHelp('');
     }
 
@@ -88,6 +89,11 @@ class ListCommand extends Carbon14Command
         // Authenticate and list all safe.
         $this->online->setToken($token);
         $archiveList = $this->online->storageC14()->getArchiveList($safeUuid);
+
+        // Reverse list to display a natural order.
+        if ($input->getOption('reverse')) {
+            $archiveList = array_reverse($archiveList);
+        }
 
         $rows = array();
         foreach ($archiveList as $archive) {

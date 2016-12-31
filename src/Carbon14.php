@@ -26,9 +26,11 @@
 
 namespace Carbon14;
 
+use Carbon14\DependencyInjection\Compiler\CommandPass;
 use Carbon14\DependencyInjection\Compiler\ProtocolPass;
 use Carbon14\DependencyInjection\Compiler\SourcePass;
 use Carbon14\Command;
+use Carbon14\Manager\CommandManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -84,6 +86,7 @@ class Carbon14 extends Application
         $loader = new YamlFileLoader($container, new FileLocator($dir));
         $loader->load('config.yml');
 
+        $container->addCompilerPass(new CommandPass());
         $container->addCompilerPass(new ProtocolPass());
         $container->addCompilerPass(new SourcePass());
 
@@ -117,23 +120,10 @@ class Carbon14 extends Application
      */
     protected function registerCommands()
     {
-        $commands = array(
-          new Command\InitCommand(),
-          new Command\CronCommand(),
-          new Command\UpdateCommand(),
-          new Command\Archive\FreezeCommand(),
-          new Command\Archive\ListCommand(),
-          new Command\Archive\RestoreCommand(),
-          new Command\Archive\Job\ListCommand(),
-          new Command\Archive\Key\DeleteCommand(),
-          new Command\Archive\Key\GetCommand(),
-          new Command\Archive\Key\SetCommand(),
-          new Command\Safe\CreateCommand(),
-          new Command\Safe\DeleteCommand(),
-          new Command\Safe\ListCommand(),
-        );
+        /** @var CommandManager $commandManager */
+        $commandManager = $this->getContainer()->get('command_manager');
 
-        $this->addCommands($commands);
+        $this->addCommands($commandManager->getCommands());
     }
 
     /**

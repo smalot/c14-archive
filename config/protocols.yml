@@ -3,5 +3,6 @@ services:
         class: Carbon14\Protocol\Ftp
         arguments:
           - "@event_dispatcher"
+        private: true
         tags:
           - { name: carbon14.protocol, type: ftp }

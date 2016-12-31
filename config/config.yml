@@ -1,6 +1,7 @@
 imports:
     - { resource: 'sources.yml' }
     - { resource: 'protocols.yml' }
+    - { resource: 'commands.yml' }
 
 services:
     event_dispatcher:
@@ -11,3 +12,6 @@ services:
 
     protocol_manager:
         class: Carbon14\Manager\ProtocolManager
+
+    command_manager:
+        class: Carbon14\Manager\CommandManager

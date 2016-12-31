@@ -36,6 +36,9 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class ProtocolPass implements CompilerPassInterface
 {
+    /**
+     * @param ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->has('protocol_manager')) {
@@ -43,7 +46,6 @@ class ProtocolPass implements CompilerPassInterface
         }
 
         $definition = $container->findDefinition('protocol_manager');
-
         $taggedServices = $container->findTaggedServiceIds('carbon14.protocol');
 
         foreach ($taggedServices as $id => $tags) {

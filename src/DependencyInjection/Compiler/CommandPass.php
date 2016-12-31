@@ -31,33 +31,30 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Class SourcePass
+ * Class CommandPass
  * @package Carbon14\DependencyInjection\Compiler
  */
-class SourcePass implements CompilerPassInterface
+class CommandPass implements CompilerPassInterface
 {
     /**
      * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('source_manager')) {
+        if (!$container->has('command_manager')) {
             return;
         }
 
-        $definition = $container->findDefinition('source_manager');
-        $taggedServices = $container->findTaggedServiceIds('carbon14.source');
+        $definition = $container->findDefinition('command_manager');
+        $taggedServices = $container->findTaggedServiceIds('carbon14.command');
 
         foreach ($taggedServices as $id => $tags) {
-            foreach ($tags as $attributes) {
-                $definition->addMethodCall(
-                  'register',
-                  array(
-                    $attributes['type'],
-                    new Reference($id),
-                  )
-                );
-            }
+            $definition->addMethodCall(
+              'register',
+              array(
+                new Reference($id),
+              )
+            );
         }
     }
 }

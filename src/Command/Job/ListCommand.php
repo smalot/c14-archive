@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-namespace Carbon14\Command\Safe;
+namespace Carbon14\Command\Job;
 
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
@@ -35,7 +35,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class ListCommand
- * @package Carbon14\Command\Safe
+ * @package Carbon14\Command\Job
  */
 class ListCommand extends Carbon14Command
 {
@@ -62,8 +62,8 @@ class ListCommand extends Carbon14Command
         parent::configure();
 
         $this
-          ->setName('safe:list')
-          ->setDescription('Get a list of the user\'s safes')
+          ->setName('job:list')
+          ->setDescription('Get a list of jobs')
           ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
           ->setHelp('');
     }
