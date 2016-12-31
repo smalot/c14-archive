@@ -28,7 +28,6 @@ namespace Carbon14;
 
 use Carbon14\DependencyInjection\Compiler\ProtocolPass;
 use Carbon14\DependencyInjection\Compiler\SourcePass;
-use Carbon14\Source;
 use Carbon14\Command;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;
@@ -36,8 +35,6 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class Carbon14
@@ -70,15 +67,15 @@ class Carbon14 extends Application
 
         parent::__construct($name, $version);
 
-        $this->loadContainer();
+        $this->registerContainer();
         $this->setDispatcher($this->container->get('event_dispatcher'));
         $this->registerCommands();
     }
 
     /**
-     *
+     * Register dependency injection container.
      */
-    protected function loadContainer()
+    protected function registerContainer()
     {
         $container = new ContainerBuilder();
 

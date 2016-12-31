@@ -26,10 +26,8 @@
 
 namespace Carbon14\Command\Safe;
 
-use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -78,18 +76,16 @@ class ListCommand extends Carbon14Command
     {
         parent::execute($input, $output);
 
-        /** @var Carbon14 $application */
-        $application = $this->getApplication();
-        /** @var array $settings */
-        $settings = $application->getSettings();
+        // Load settings.
+        $settings = $this->getSettings();
         $token = $settings['token'];
-
-        $selected = !empty($settings['default']['safe']) ? $settings['default']['safe'] : '';
+        $selectedSafe = !empty($settings['default']['safe']) ? $settings['default']['safe'] : '';
 
         // Authenticate and list all safe.
         $this->online->setToken($token);
         $safeList = $this->online->storageC14()->getSafeList();
 
+        // Prepare output.
         $rows = array();
         foreach ($safeList as $safe) {
             $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
@@ -100,11 +96,15 @@ class ListCommand extends Carbon14Command
               $safe['description'],
               $safe['status'],
               preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
-              $selected == $safe['uuid_ref'] ? '*' : '',
+              $selectedSafe == $safe['uuid_ref'] ? '*' : '',
             );
         }
 
+        // Render output.
         $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'label', 'description', 'status', 'locked', 'selected'), $rows);
+        $io->table(
+          array('uuid', 'label', 'description', 'status', 'locked', 'selected'),
+          $rows
+        );
     }
 }

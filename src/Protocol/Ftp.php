@@ -124,6 +124,7 @@ class Ftp extends ProtocolAbstract
             return $this;
         }
 
+        // Temporary file name, renamed when successfull.
         $tmpFilename = $file->getFilename().'.tmp';
         $handle = fopen($file->getRealPath(), 'r');
 
@@ -182,6 +183,7 @@ class Ftp extends ProtocolAbstract
 
         $parts = explode(DIRECTORY_SEPARATOR, $path);
 
+        // Check each part of the tree.
         foreach ($parts as $part) {
             if (!@ftp_chdir($this->connection, $part)) {
                 ftp_mkdir($this->connection, $part);

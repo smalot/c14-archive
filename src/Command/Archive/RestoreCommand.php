@@ -26,15 +26,12 @@
 
 namespace Carbon14\Command\Archive;
 
-use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class RestoreCommand
@@ -83,24 +80,16 @@ class RestoreCommand extends Carbon14Command
     {
         parent::execute($input, $output);
 
-        /** @var Carbon14 $application */
-        $application = $this->getApplication();
-        /** @var array $settings */
-        $settings = $application->getSettings();
+        // Load settings.
+        $settings = $this->getSettings();
         $token = $settings['token'];
 
-        $safeUuid = $input->getOption('safe');
-        if (empty($safeUuid)) {
-            $safeUuid = $settings['default']['safe'];
-        }
-
-        if (empty($safeUuid)) {
-            throw new \InvalidArgumentException('Missing safe uuid');
-        }
-
+        // Load basic identifiers.
+        $safeUuid = $this->getSafeIdentifier($input);
         $archiveUuid = $input->getArgument('archive');
         $key = $input->getOption('key');
 
+        // Authenticate.
         $this->online->setToken($token);
 
         $locations = $this->online->storageC14()->getLocationList($safeUuid, $archiveUuid);
@@ -118,6 +107,7 @@ class RestoreCommand extends Carbon14Command
           $protocols
         );
 
+        // Render output.
         $output->writeln('<info>Archive unarchive successfully launched</info>');
     }
 }

@@ -27,7 +27,6 @@
 namespace Carbon14\Event;
 
 use Carbon14\Model\File;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class TransferProgressEvent

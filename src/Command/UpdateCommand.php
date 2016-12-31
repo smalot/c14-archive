@@ -28,7 +28,6 @@ namespace Carbon14\Command;
 
 use GuzzleHttp\Client;
 use Humbug\SelfUpdate\Updater;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -121,7 +120,7 @@ class UpdateCommand extends Carbon14Command
                 }
             }
         } catch (\Exception $e) {
-            $output->writeln('<error>Oups, something happened!</error>');
+            $output->writeln('<error>Oops, something wrong happened!</error>');
             $output->writeln('<error>'.$e->getMessage().'</error>');
             exit(1);
         }

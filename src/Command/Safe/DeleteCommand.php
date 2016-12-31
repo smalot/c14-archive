@@ -26,11 +26,8 @@
 
 namespace Carbon14\Command\Safe;
 
-use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
-use Carbon14\Config;
 use Smalot\Online\Online;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -91,25 +88,25 @@ class DeleteCommand extends Carbon14Command
             return;
         }
 
-        /** @var Carbon14 $application */
-        $application = $this->getApplication();
-        /** @var array $settings */
-        $settings = $application->getSettings();
+        // Load settings.
+        $settings = $this->getSettings();
         $token = $settings['token'];
-        $uuid = $input->getArgument('uuid');
 
-        // Authenticate and list all safe.
+        // Authenticate.
         $this->online->setToken($token);
 
-        $safe = $this->online->storageC14()->getSafeDetails($uuid);
+        // Check if locked.
+        $safeIdentifier = $input->getArgument('uuid');
+        $safe = $this->online->storageC14()->getSafeDetails($safeIdentifier);
         if (preg_match('/locked/mis', $safe['description'])) {
             $output->writeln("<error>Safe locked, can't be deleted</error>");
 
             return;
         }
 
-        $this->online->storageC14()->deleteSafe($uuid);
+        $this->online->storageC14()->deleteSafe($safeIdentifier);
 
+        // Render output.
         $output->writeln('<info>Safe deleted</info>');
     }
 

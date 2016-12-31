@@ -44,7 +44,7 @@ class ConfigManager
      */
     protected function __construct()
     {
-
+        // Nothing to do.
     }
 
     /**

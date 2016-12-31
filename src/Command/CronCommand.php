@@ -204,7 +204,7 @@ class CronCommand extends Carbon14Command
         // If not found, so create it.
         $date = (date('N') == 1 ? time() : strtotime('previous monday'));
         $name = date('Y-m-d', $date);
-        $description = 'locked';
+        $description = 'automatically locked';
 
         $platforms = $this->online->storageC14()->getPlatformList();
         $platform = reset($platforms);

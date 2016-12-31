@@ -26,7 +26,7 @@
 
 namespace Carbon14;
 
-use Carbon14\Source\SourceInterface;
+use Carbon14\Source\SourceAbstract;
 
 /**
  * Class Job
@@ -50,7 +50,7 @@ class Job
     protected $lastExecution;
 
     /**
-     * @var SourceInterface
+     * @var SourceAbstract
      */
     protected $source;
 
@@ -113,7 +113,7 @@ class Job
     }
 
     /**
-     * @param SourceInterface $source
+     * @param SourceAbstract $source
      */
     public function setSource($source)
     {
@@ -121,23 +121,10 @@ class Job
     }
 
     /**
-     * @return SourceInterface
+     * @return SourceAbstract
      */
     public function getSource()
     {
         return $this->source;
-    }
-
-    /**
-     * @return array
-     */
-    public function export()
-    {
-        return array(
-          'name' => $this->name,
-          'frequency' => $this->frequency,
-          'last_execution' => $this->lastExecution,
-          'source' => $this->source->export(),
-        );
     }
 }

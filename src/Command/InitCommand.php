@@ -28,11 +28,9 @@ namespace Carbon14\Command;
 
 use Carbon14\Carbon14;
 use Smalot\Online\Online;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -95,7 +93,7 @@ class InitCommand extends Carbon14Command
     {
         parent::interact($input, $output);
 
-        $settings = $this->getApplication()->getSettings();
+        $settings = $this->getSettings();
 
         $helper = $this->getHelper('question');
         $io = new SymfonyStyle($input, $output);
@@ -193,19 +191,18 @@ class InitCommand extends Carbon14Command
         $token = $input->getOption('token');
         $safe = $input->getOption('safe');
         $duration = intval($input->getOption('duration'));
+        $settings = $this->getSettings();
 
         // Check token if not already done.
         $this->loadSafeList($token);
-
-        $settings = $this->getApplication()->getSettings();
 
         // Update settings.
         $settings['token'] = $token;
         $settings['default']['safe'] = $safe;
         $settings['default']['duration'] = $duration;
 
+        // Store updated config.
         $this->getApplication()->setSettings($settings);
-
         if ($this->getApplication()->saveConfigFile()) {
             $output->writeln('<info>Configuration saved.</info>');
         }

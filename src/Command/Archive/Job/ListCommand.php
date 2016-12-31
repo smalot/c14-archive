@@ -120,6 +120,9 @@ class ListCommand extends Carbon14Command
 
         // Render output.
         $io = new SymfonyStyle($input, $output);
-        $io->table(array('uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'), $rows);
+        $io->table(
+          array('uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'),
+          $rows
+        );
     }
 }

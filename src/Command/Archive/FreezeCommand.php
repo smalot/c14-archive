@@ -26,7 +26,6 @@
 
 namespace Carbon14\Command\Archive;
 
-use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Input\InputArgument;
@@ -80,26 +79,19 @@ class FreezeCommand extends Carbon14Command
     {
         parent::execute($input, $output);
 
-        /** @var Carbon14 $application */
-        $application = $this->getApplication();
-        /** @var array $settings */
-        $settings = $application->getSettings();
+        // Load settings.
+        $settings = $this->getSettings();
         $token = $settings['token'];
 
-        $safeUuid = $input->getOption('safe');
-        if (empty($safeUuid)) {
-            $safeUuid = $settings['default']['safe'];
-        }
-
-        if (empty($safeUuid)) {
-            throw new \InvalidArgumentException('Missing safe uuid');
-        }
-
+        // Load basic identifiers.
+        $safeUuid = $this->getSafeIdentifier($input);
         $archiveUuid = $input->getArgument('archive');
 
+        // Authenticate and freeze archive.
         $this->online->setToken($token);
         $this->online->storageC14()->doArchive($safeUuid, $archiveUuid);
 
+        // Render output.
         $output->writeln('<info>Archive freeze successfully launched</info>');
     }
 }
