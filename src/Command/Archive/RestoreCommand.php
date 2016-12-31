@@ -48,7 +48,7 @@ class RestoreCommand extends Carbon14Command
     protected $online;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
@@ -89,29 +89,29 @@ class RestoreCommand extends Carbon14Command
         $settings = $application->getSettings();
         $token = $settings['token'];
 
-        $safe_uuid = $input->getOption('safe');
-        if (empty($safe_uuid)) {
-            $safe_uuid = $settings['default']['safe'];
+        $safeUuid = $input->getOption('safe');
+        if (empty($safeUuid)) {
+            $safeUuid = $settings['default']['safe'];
         }
 
-        if (empty($safe_uuid)) {
+        if (empty($safeUuid)) {
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
-        $archive_uuid = $input->getArgument('archive');
+        $archiveUuid = $input->getArgument('archive');
         $key = $input->getOption('key');
 
         $this->online->setToken($token);
 
-        $locations = $this->online->storageC14()->getLocationList($safe_uuid, $archive_uuid);
+        $locations = $this->online->storageC14()->getLocationList($safeUuid, $archiveUuid);
         $location = reset($locations);
 
         // Default protocol.
         $protocols = ['FTP'];
 
         $this->online->storageC14()->doUnarchive(
-          $safe_uuid,
-          $archive_uuid,
+          $safeUuid,
+          $archiveUuid,
           $location['uuid_ref'],
           true,
           "$key",

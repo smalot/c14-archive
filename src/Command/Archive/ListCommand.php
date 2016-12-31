@@ -48,7 +48,7 @@ class ListCommand extends Carbon14Command
     protected $online;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
@@ -87,22 +87,22 @@ class ListCommand extends Carbon14Command
         $settings = $application->getSettings();
         $token = $settings['token'];
 
-        $safe_uuid = $input->getOption('safe');
-        if (empty($safe_uuid)) {
-            $safe_uuid = $settings['default']['safe'];
+        $safeUuid = $input->getOption('safe');
+        if (empty($safeUuid)) {
+            $safeUuid = $settings['default']['safe'];
         }
 
-        if (empty($safe_uuid)) {
+        if (empty($safeUuid)) {
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
         // Authenticate and list all safe.
         $this->online->setToken($token);
-        $archiveList = $this->online->storageC14()->getArchiveList($safe_uuid);
+        $archiveList = $this->online->storageC14()->getArchiveList($safeUuid);
 
         $rows = array();
         foreach ($archiveList as $archive) {
-            $archive = $this->online->storageC14()->getArchiveDetails($safe_uuid, $archive['uuid_ref']);
+            $archive = $this->online->storageC14()->getArchiveDetails($safeUuid, $archive['uuid_ref']);
             $created = new \DateTime($archive['creation_date']);
 
             $bucket = $archive['bucket'];

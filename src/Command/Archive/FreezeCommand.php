@@ -29,12 +29,10 @@ namespace Carbon14\Command\Archive;
 use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Class FreezeCommand
@@ -48,7 +46,7 @@ class FreezeCommand extends Carbon14Command
     protected $online;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
@@ -88,19 +86,19 @@ class FreezeCommand extends Carbon14Command
         $settings = $application->getSettings();
         $token = $settings['token'];
 
-        $safe_uuid = $input->getOption('safe');
-        if (empty($safe_uuid)) {
-            $safe_uuid = $settings['default']['safe'];
+        $safeUuid = $input->getOption('safe');
+        if (empty($safeUuid)) {
+            $safeUuid = $settings['default']['safe'];
         }
 
-        if (empty($safe_uuid)) {
+        if (empty($safeUuid)) {
             throw new \InvalidArgumentException('Missing safe uuid');
         }
 
-        $archive_uuid = $input->getArgument('archive');
+        $archiveUuid = $input->getArgument('archive');
 
         $this->online->setToken($token);
-        $this->online->storageC14()->doArchive($safe_uuid, $archive_uuid);
+        $this->online->storageC14()->doArchive($safeUuid, $archiveUuid);
 
         $output->writeln('<info>Archive freeze successfully launched</info>');
     }

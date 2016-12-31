@@ -50,7 +50,7 @@ class DeleteCommand extends Carbon14Command
     protected $online;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
@@ -114,7 +114,7 @@ class DeleteCommand extends Carbon14Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {

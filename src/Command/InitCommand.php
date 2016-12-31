@@ -58,7 +58,7 @@ class InitCommand extends Carbon14Command
     protected $safeList;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
@@ -68,7 +68,7 @@ class InitCommand extends Carbon14Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function configure()
     {
@@ -89,7 +89,7 @@ class InitCommand extends Carbon14Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
@@ -184,7 +184,7 @@ class InitCommand extends Carbon14Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

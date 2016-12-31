@@ -56,6 +56,36 @@ abstract class Carbon14Command extends Command
     }
 
     /**
+     * @return array
+     */
+    protected function getSettings()
+    {
+        return $this->getApplication()->getSettings();
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param bool $throwsException
+     * @return string
+     * @throws
+     */
+    protected function getSafeIdentifier(InputInterface $input, $throwsException = true)
+    {
+        $safe = $input->hasOption('safe') ? $input->getOption('safe') : '';
+
+        if (empty($safe)) {
+            $settings = $this->getSettings();
+            $safe = $settings['default']['safe'];
+        }
+
+        if ($throwsException && empty($safe)) {
+            throw new \InvalidArgumentException('Missing safe uuid');
+        }
+
+        return $safe;
+    }
+
+    /**
      * @inheritDoc
      */
     protected function initialize(InputInterface $input, OutputInterface $output)

@@ -46,7 +46,7 @@ class ListCommand extends Carbon14Command
     protected $online;
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function __construct($name = null)
     {
