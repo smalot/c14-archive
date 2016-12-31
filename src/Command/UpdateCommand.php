@@ -98,6 +98,7 @@ class UpdateCommand extends Carbon14Command
             }
         } catch (\Exception $e) {
             $output->writeln('<error>Oups, something happened!</error>');
+            $output->writeln('<error>'.$e->getMessage().'</error>');
             exit(1);
         }
     }
