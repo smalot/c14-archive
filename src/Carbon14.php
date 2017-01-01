@@ -34,6 +34,10 @@ use Carbon14\Manager\CommandManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Debug\Debug;
+use Symfony\Component\Debug\DebugClassLoader;
+use Symfony\Component\Debug\ErrorHandler;
+use Symfony\Component\Debug\ExceptionHandler;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -62,12 +66,20 @@ class Carbon14 extends Application
     public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN')
     {
         $input = new ArgvInput();
-        $env = $input->getParameterOption(array('--env', '-e'), getenv('SYMFONY_ENV') ?: 'prod');
+        $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'prod');
         $this->debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(
-            array('--no-debug', '')
+            ['--no-debug', '']
           ) && $env !== 'prod';
 
         parent::__construct($name, $version);
+
+//        if ($this->debug) {
+        error_reporting(E_ALL);
+        Debug::enable();
+        ErrorHandler::register();
+        ExceptionHandler::register();
+        DebugClassLoader::enable();
+//        }
 
         $this->registerContainer();
         $this->setDispatcher($this->container->get('event_dispatcher'));

@@ -26,7 +26,10 @@
 
 namespace Carbon14\Manager;
 
-use Carbon14\Carbon14;
+use Carbon14\Model\Job;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class JobManager
@@ -35,28 +38,115 @@ use Carbon14\Carbon14;
 class JobManager
 {
     /**
-     * @var Carbon14
+     * Default folder in the user's HOME.
      */
-    protected $application;
-
-    /**
-     * @var self
-     */
-    protected static $instance;
+    const JOB_FOLDER = '.carbon14';
 
     /**
      * ConfigManager constructor.
+     * @param SourceManager $sourceManager
      */
-    protected function __construct(Carbon14 $application)
+    public function __construct(SourceManager $sourceManager)
     {
-        $this->application = $application;
+        $this->sourceManager = $sourceManager;
     }
 
     /**
-     *
+     * @param string $content
+     * @return Job
      */
-    public function loadFromConfig()
+    public function parse($content)
     {
+        $config = Yaml::parse($content);
 
+        $config += [
+          'name' => '',
+          'description' => '',
+          'status' => 'active',
+          'last_execution' => '',
+          'source' => [],
+        ];
+
+        $config['source'] += [
+          'type' => '',
+          'settings' => [],
+        ];
+
+        $lastExecution = $config['last_execution'] ? new \DateTime($config['last_execution']) : null;
+
+        $job = new Job();
+        $job->setName($config['name']);
+        $job->setDescription($config['description']);
+        $job->setStatus($config['status']);
+        $job->setLastExecution($lastExecution);
+        $job->setSourceType($config['source']['type']);
+        $job->setSourceSettings($config['source']['settings']);
+
+        return $job;
+    }
+
+    /**
+     * @param Job $job
+     * @return string
+     */
+    public function dump(Job $job)
+    {
+        $lastExecution = $job->getLastExecution();
+
+        $config = [
+          'name' => $job->getName(),
+          'description' => $job->getDescription(),
+          'status' => $job->getStatus(),
+          'last_execution' => $lastExecution ? $lastExecution->format('Y-m-d H:i:s') : null,
+          'source' => [
+            'type' => $job->getSourceType(),
+            'settings' => $job->getSourceSettings(),
+          ],
+        ];
+
+        $content = Yaml::dump($config);
+
+        return $content;
+    }
+
+    /**
+     * @param string $directory
+     * @return Job[]
+     */
+    public function findFiles($directory)
+    {
+        $fs = new Filesystem();
+
+        // Default folder.
+        if (empty($directory)) {
+            $home = getenv('HOME');
+            $directory = $home.DIRECTORY_SEPARATOR.self::JOB_FOLDER;
+
+            if (!$fs->exists($directory)) {
+                $fs->mkdir($directory);
+            }
+        }
+
+        if (!$fs->exists($directory)) {
+            return [];
+        }
+
+        $finder = new Finder();
+        $finder->files()
+          ->in($directory)
+          ->depth('== 0')
+          ->name('*.yml');
+
+        $jobs = [];
+        foreach ($finder as $file) {
+            $job = $this->parse($file->getContents());
+            if (!$job->getName()) {
+                // Use the filename as default job name.
+                $job->setName($file->getBasename('.yml'));
+            }
+            $jobs[] = $job;
+        }
+
+        return $jobs;
     }
 }

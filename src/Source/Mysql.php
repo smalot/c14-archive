@@ -30,7 +30,7 @@ namespace Carbon14\Source;
  * Class Mysql
  * @package Carbon14\Source
  */
-class Mysql extends SourceAbstract
+class Mysql implements SourceInterface
 {
     /**
      * @inheritDoc

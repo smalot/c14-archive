@@ -41,13 +41,13 @@ class Config
      * Config constructor.
      * @param array $settings
      */
-    public function __construct($settings = array())
+    public function __construct($settings = [])
     {
-        $settings += array(
+        $settings += [
           'token' => null,
-          'default' => array(),
-          'jobs' => array(),
-        );
+          'default' => [],
+          'jobs' => [],
+        ];
 
         $this->settings = $settings;
 
@@ -67,6 +67,6 @@ class Config
      */
     public function export()
     {
-        return array();
+        return [];
     }
 }

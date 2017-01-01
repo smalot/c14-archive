@@ -29,35 +29,14 @@ namespace Carbon14\Source;
 use Carbon14\Model\FileCollection;
 
 /**
- * Class SourceAbstract
+ * Interface SourceInterface
  * @package Carbon14\Source
  */
-abstract class SourceAbstract
+interface SourceInterface
 {
     /**
-     * @var FileCollection
-     */
-    protected $fileCollection;
-
-    /**
-     * @return \Carbon14\Model\FileCollection
-     */
-    public function getFileCollection()
-    {
-        return $this->fileCollection;
-    }
-
-    /**
-     * @param \Carbon14\Model\FileCollection $fileCollection
-     */
-    public function setFileCollection($fileCollection)
-    {
-        $this->fileCollection = $fileCollection;
-    }
-
-    /**
      * @param array $settings
-     * @return $this
+     * @return FileCollection
      */
-    abstract public function run(array $settings);
+    public function run(array $settings);
 }

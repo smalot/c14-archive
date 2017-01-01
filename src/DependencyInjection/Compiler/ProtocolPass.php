@@ -52,10 +52,10 @@ class ProtocolPass implements CompilerPassInterface
             foreach ($tags as $attributes) {
                 $definition->addMethodCall(
                   'register',
-                  array(
+                  [
                     $attributes['type'],
                     new Reference($id),
-                  )
+                  ]
                 );
             }
         }

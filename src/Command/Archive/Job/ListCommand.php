@@ -98,7 +98,7 @@ class ListCommand extends Carbon14Command
         }
 
         // Prepare output.
-        $rows = array();
+        $rows = [];
         foreach ($jobs as $job) {
             $started = new \DateTime($job['start']);
             $duration = 0;
@@ -107,7 +107,7 @@ class ListCommand extends Carbon14Command
                 $duration = max(0, $ended->getTimestamp() - $started->getTimestamp());
             }
 
-            $rows[] = array(
+            $rows[] = [
               $job['uuid_ref'],
               (isset($job['parent_job']) ? '- ' : '').str_replace('_', ' ', $job['type']),
               $started->format('Y-m-d H:i:s'),
@@ -115,13 +115,13 @@ class ListCommand extends Carbon14Command
               $job['progress'].'%',
               ($duration ? $duration.'s' : '-'),
               $job['status'],
-            );
+            ];
         }
 
         // Render output.
         $io = new SymfonyStyle($input, $output);
         $io->table(
-          array('uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'),
+          ['uuid', 'type', 'start', 'end', 'progress', 'duration', 'status'],
           $rows
         );
     }

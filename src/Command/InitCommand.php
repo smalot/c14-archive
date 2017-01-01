@@ -127,16 +127,16 @@ class InitCommand extends Carbon14Command
             $this->loadSafeList($input->getOption('token'));
             $default_safe = isset($settings['default']['safe']) ? $settings['default']['safe'] : '';
             $default = $position = 0;
-            $rows = array();
+            $rows = [];
 
             foreach ($this->safeList as $safe) {
                 if ($safe['status'] == 'active') {
-                    $rows[] = array(
+                    $rows[] = [
                       $position,
                       $safe['uuid_ref'],
                       $safe['name'],
                       $safe['description'],
-                    );
+                    ];
 
                     if ($safe['uuid_ref'] == $default_safe) {
                         $default = $position;
@@ -146,7 +146,7 @@ class InitCommand extends Carbon14Command
                 }
             }
 
-            $io->table(array('#', 'uuid', 'label', 'description'), $rows);
+            $io->table(['#', 'uuid', 'label', 'description'], $rows);
 
             $question = new Question(
               "<info>Select the default safe name</info> [<comment>$default</comment>]\n > ",
@@ -166,7 +166,7 @@ class InitCommand extends Carbon14Command
             );
             $question->setValidator(
               function ($answer) {
-                  if (!in_array($answer, array(2, 5, 7))) {
+                  if (!in_array($answer, [2, 5, 7])) {
                       throw new \RuntimeException('Invalid value.');
                   }
 

@@ -51,9 +51,9 @@ class CommandPass implements CompilerPassInterface
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall(
               'register',
-              array(
+              [
                 new Reference($id),
-              )
+              ]
             );
         }
     }

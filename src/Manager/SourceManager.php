@@ -26,7 +26,7 @@
 
 namespace Carbon14\Manager;
 
-use Carbon14\Source\SourceAbstract;
+use Carbon14\Source\SourceInterface;
 
 /**
  * Class SourceManager
@@ -49,16 +49,16 @@ class SourceManager
 
     /**
      * @param string $type
-     * @param SourceAbstract $source
+     * @param SourceInterface $source
      */
-    public function register($type, SourceAbstract $source)
+    public function register($type, SourceInterface $source)
     {
         $this->sources[$type] = $source;
     }
 
     /**
      * @param string $type
-     * @return SourceAbstract
+     * @return SourceInterface
      * @throws \Exception
      */
     public function get($type)

@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (C) 2016 - Sebastien Malot <sebastien@malot.fr>
+ * Copyright (C) 2017 - Sebastien Malot <sebastien@malot.fr>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,11 @@
  * SOFTWARE.
  */
 
-namespace Carbon14;
-
-use Carbon14\Source\SourceInterface;
+namespace Carbon14\Model;
 
 /**
  * Class Job
- * @package Carbon14
+ * @package Carbon14\Event
  */
 class Job
 {
@@ -42,7 +40,12 @@ class Job
     /**
      * @var string
      */
-    protected $frequency;
+    protected $description;
+
+    /**
+     * @var string
+     */
+    protected $status;
 
     /**
      * @var \DateTime
@@ -50,27 +53,14 @@ class Job
     protected $lastExecution;
 
     /**
-     * @var SourceInterface
+     * @var string
      */
-    protected $source;
+    protected $sourceType;
 
     /**
-     * Job constructor.
-     *
-     * @param string $name
+     * @var array
      */
-    public function __construct($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
+    protected $sourceSettings;
 
     /**
      * @return string
@@ -81,27 +71,52 @@ class Job
     }
 
     /**
-     * @param string $frequency
+     * @param string $name
+     * @return Job
      */
-    public function setFrequency($frequency)
+    public function setName($name)
     {
-        $this->frequency = $frequency;
+        $this->name = $name;
+
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getFrequency()
+    public function getDescription()
     {
-        return $this->frequency;
+        return $this->description;
     }
 
     /**
-     * @param \DateTime $lastExecution
+     * @param string $description
+     * @return Job
      */
-    public function setLastExecution($lastExecution)
+    public function setDescription($description)
     {
-        $this->lastExecution = $lastExecution;
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     * @return Job
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
     }
 
     /**
@@ -113,18 +128,51 @@ class Job
     }
 
     /**
-     * @param SourceInterface $source
+     * @param \DateTime $lastExecution
+     * @return Job
      */
-    public function setSource($source)
+    public function setLastExecution($lastExecution)
     {
-        $this->source = $source;
+        $this->lastExecution = $lastExecution;
+
+        return $this;
     }
 
     /**
-     * @return SourceInterface
+     * @return string
      */
-    public function getSource()
+    public function getSourceType()
     {
-        return $this->source;
+        return $this->sourceType;
+    }
+
+    /**
+     * @param string $sourceType
+     * @return Job
+     */
+    public function setSourceType($sourceType)
+    {
+        $this->sourceType = $sourceType;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSourceSettings()
+    {
+        return $this->sourceSettings;
+    }
+
+    /**
+     * @param array $sourceSettings
+     * @return Job
+     */
+    public function setSourceSettings($sourceSettings)
+    {
+        $this->sourceSettings = $sourceSettings;
+
+        return $this;
     }
 }

@@ -34,7 +34,7 @@ use Symfony\Component\Finder\Finder;
  * Class Direct
  * @package Carbon14\Source
  */
-class Direct extends SourceAbstract
+class Direct implements SourceInterface
 {
     /**
      * @inheritdoc
@@ -50,8 +50,6 @@ class Direct extends SourceAbstract
             $fileCollection->attach(new File($file));
         }
 
-        $this->setFileCollection($fileCollection);
-
-        return $this;
+        return $fileCollection;
     }
 }

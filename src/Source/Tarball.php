@@ -30,7 +30,7 @@ namespace Carbon14\Source;
  * Class Tarball
  * @package Carbon14\Source
  */
-class Tarball extends SourceAbstract
+class Tarball implements SourceInterface
 {
     /**
      * @inheritDoc

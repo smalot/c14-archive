@@ -27,11 +27,14 @@
 namespace Carbon14\Command\Job;
 
 use Carbon14\Command\Carbon14Command;
+use Carbon14\Manager\JobManager;
+use Carbon14\Model\Job;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Class ListCommand
@@ -64,6 +67,7 @@ class ListCommand extends Carbon14Command
         $this
           ->setName('job:list')
           ->setDescription('Get a list of jobs')
+          ->addOption('directory', 'd', InputOption::VALUE_REQUIRED, 'Config directory - default to $HOME/carbon14')
           ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
           ->setHelp('');
     }
@@ -78,39 +82,31 @@ class ListCommand extends Carbon14Command
     {
         parent::execute($input, $output);
 
-        // Load settings.
-        $settings = $this->getSettings();
-        $token = $settings['token'];
-        $selectedSafe = !empty($settings['default']['safe']) ? $settings['default']['safe'] : '';
+        $directory = $input->getOption('directory');
 
-        // Authenticate and list all safe.
-        $this->online->setToken($token);
-        $safeList = $this->online->storageC14()->getSafeList();
-
-        // Reverse list to display a natural order.
-        if ($input->getOption('reverse')) {
-            $safeList = array_reverse($safeList);
-        }
+        /** @var JobManager $jobManager */
+        $jobManager = $this->get('job_manager');
+        $jobList = $jobManager->findFiles($directory);
 
         // Prepare output.
-        $rows = array();
-        foreach ($safeList as $safe) {
-            $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
+        $rows = [];
+        /** @var Job $job */
+        foreach ($jobList as $job) {
+            $lastExecution = $job->getLastExecution();
 
-            $rows[] = array(
-              $safe['uuid_ref'],
-              $safe['name'],
-              $safe['description'],
-              $safe['status'],
-              preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
-              $selectedSafe == $safe['uuid_ref'] ? '*' : '',
-            );
+            $rows[] = [
+              $job->getName(),
+              substr($job->getDescription(), 0, 25),
+              $job->getSourceType(),
+              $job->getStatus(),
+              $lastExecution ? $lastExecution->format('Y-m-d H:i:s') : 'never',
+            ];
         }
 
         // Render output.
         $io = new SymfonyStyle($input, $output);
         $io->table(
-          array('uuid', 'label', 'description', 'status', 'locked', 'selected'),
+          ['name', 'description', 'type', 'status', 'last execution'],
           $rows
         );
     }

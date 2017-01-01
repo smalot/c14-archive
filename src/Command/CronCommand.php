@@ -127,9 +127,9 @@ class CronCommand extends Carbon14Command
         /** @var SourceManager $sourceManager */
         $sourceManager = $this->get('source_manager');
         $source = $sourceManager->get($settings['job']['source']['type']);
-        $source->run($settings['job']['source']['settings']);
+        $fileCollection = $source->run($settings['job']['source']['settings']);
 
-        $output->writeln('Found '.$source->getFileCollection()->count().' file(s)');
+        $output->writeln('Found '.$fileCollection->count().' file(s)');
 
         $bucket = $this->online->storageC14()->getBucketDetails($safeUuid, $archive['uuid_ref']);
 
@@ -151,7 +151,7 @@ class CronCommand extends Carbon14Command
         $protocol = $protocolManager->get($protocolType);
         $protocol->open($credentials[$protocolType]);
         $protocol->transferFiles(
-          $source->getFileCollection(),
+          $fileCollection,
           $input->getOption('override'),
           !$input->getOption('no-resume')
         );

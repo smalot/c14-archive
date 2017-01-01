@@ -30,7 +30,7 @@ namespace Carbon14\Source;
  * Class Postgresql
  * @package Carbon14\Source
  */
-class Postgresql extends SourceAbstract
+class Postgresql implements SourceInterface
 {
     /**
      * @inheritDoc

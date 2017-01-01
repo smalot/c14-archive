@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-namespace Carbon14\Command\Archive;
+namespace Carbon14\Command\Job;
 
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
@@ -34,10 +34,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class ListCommand
- * @package Carbon14\Command\Archive
+ * Class RunCommand
+ * @package Carbon14\Command\Job
  */
-class ListCommand extends Carbon14Command
+class RunCommand extends Carbon14Command
 {
     /**
      * @var Online
@@ -62,10 +62,8 @@ class ListCommand extends Carbon14Command
         parent::configure();
 
         $this
-          ->setName('archive:list')
-          ->setDescription('List all archives')
-          ->addOption('safe', null, InputOption::VALUE_REQUIRED, 'Referring safe (fallback on .carbon14.yml file)')
-          ->addOption('reverse', null, InputOption::VALUE_NONE, 'Reverse list')
+          ->setName('job:run')
+          ->setDescription('Run a job')
           ->setHelp('');
     }
 
@@ -82,46 +80,36 @@ class ListCommand extends Carbon14Command
         // Load settings.
         $settings = $this->getSettings();
         $token = $settings['token'];
-
-        // Load basic identifiers.
-        $safeUuid = $this->getSafeIdentifier($input);
+        $selectedSafe = !empty($settings['default']['safe']) ? $settings['default']['safe'] : '';
 
         // Authenticate and list all safe.
         $this->online->setToken($token);
-        $archiveList = $this->online->storageC14()->getArchiveList($safeUuid);
+        $safeList = $this->online->storageC14()->getSafeList();
 
         // Reverse list to display a natural order.
         if ($input->getOption('reverse')) {
-            $archiveList = array_reverse($archiveList);
+            $safeList = array_reverse($safeList);
         }
 
+        // Prepare output.
         $rows = [];
-        foreach ($archiveList as $archive) {
-            $archive = $this->online->storageC14()->getArchiveDetails($safeUuid, $archive['uuid_ref']);
-            $created = new \DateTime($archive['creation_date']);
-
-            $bucket = $archive['bucket'];
-            $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime(
-              $archive['bucket']['archival_date']
-            ) : null;
+        foreach ($safeList as $safe) {
+            $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
 
             $rows[] = [
-              $archive['uuid_ref'],
-              $archive['name'],
-              $archive['description'],
-              $archive['parity'],
-              $created->format('Y-m-d H:i:s'),
-              $bucket['status'],
-              ($archival ? $archival->format('Y-m-d H:i:s') : ''),
-              $archive['status'],
-              preg_match('/locked/mis', $archive['description']) ? 'yes' : 'no',
+              $safe['uuid_ref'],
+              $safe['name'],
+              $safe['description'],
+              $safe['status'],
+              preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
+              $selectedSafe == $safe['uuid_ref'] ? '*' : '',
             ];
         }
 
         // Render output.
         $io = new SymfonyStyle($input, $output);
         $io->table(
-          ['uuid', 'label', 'description', 'parity', 'created', 'bucket', 'archival', 'status', 'locked'],
+          ['uuid', 'label', 'description', 'status', 'locked', 'selected'],
           $rows
         );
     }

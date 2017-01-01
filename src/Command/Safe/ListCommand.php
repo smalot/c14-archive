@@ -93,24 +93,24 @@ class ListCommand extends Carbon14Command
         }
 
         // Prepare output.
-        $rows = array();
+        $rows = [];
         foreach ($safeList as $safe) {
             $safe = $this->online->storageC14()->getSafeDetails($safe['uuid_ref']);
 
-            $rows[] = array(
+            $rows[] = [
               $safe['uuid_ref'],
               $safe['name'],
               $safe['description'],
               $safe['status'],
               preg_match('/locked/mis', $safe['description']) ? 'yes' : 'no',
               $selectedSafe == $safe['uuid_ref'] ? '*' : '',
-            );
+            ];
         }
 
         // Render output.
         $io = new SymfonyStyle($input, $output);
         $io->table(
-          array('uuid', 'label', 'description', 'status', 'locked', 'selected'),
+          ['uuid', 'label', 'description', 'status', 'locked', 'selected'],
           $rows
         );
     }
