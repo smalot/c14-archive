@@ -94,7 +94,7 @@ Sample file for a direct file transfer. (`$HOME/.carbon14/redmine.yml`)
 name: 'Redmine'
 description: 'Transfer the 2 lastest backup files'
 status: active
-last_execution: "2016-12-31 12:51:00"
+last_execution: '2016-12-31 12:51:00'
 source:
   type: direct
   settings:
@@ -105,7 +105,7 @@ source:
       not_name: ~
       size: ~
       follow_links: false
-      sort: modified_time
+      sort: 'modified_time'
       reverse: true
       count: 2
 ````
