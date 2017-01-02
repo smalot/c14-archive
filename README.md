@@ -17,11 +17,17 @@ Carbon14
 
 
 ````sh
+# Download the latest release
 wget -O- https://github.com/smalot/carbon14/releases/download/v0.3.0/carbon14.phar > carbon14
+
+# Add execution flag
 chmod +x carbon14
+
+# Check
+./carbon14 list
 ````
 
-*Note update url with the latest release number.*
+*Update url with the latest release number*
 
 
 ## Initialize
