@@ -31,8 +31,6 @@ use Carbon14\EventSubscriber\EventLoggerSubscriber;
 use Carbon14\Manager\JobManager;
 use Carbon14\Manager\ProtocolManager;
 use Carbon14\Manager\SourceManager;
-use Carbon14\Model\File;
-use Carbon14\Model\Job;
 use Carbon14\Protocol\ProtocolAbstract;
 use Smalot\Online\Online;
 use Smalot\Online\OnlineException;
@@ -40,7 +38,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**

@@ -26,7 +26,6 @@
 
 namespace Carbon14\Command\Archive\Key;
 
-use Carbon14\Carbon14;
 use Carbon14\Command\Carbon14Command;
 use Smalot\Online\Online;
 use Symfony\Component\Console\Input\InputArgument;

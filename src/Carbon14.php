@@ -29,7 +29,6 @@ namespace Carbon14;
 use Carbon14\DependencyInjection\Compiler\CommandPass;
 use Carbon14\DependencyInjection\Compiler\ProtocolPass;
 use Carbon14\DependencyInjection\Compiler\SourcePass;
-use Carbon14\Command;
 use Carbon14\Manager\CommandManager;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;

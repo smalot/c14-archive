@@ -28,7 +28,6 @@ namespace Carbon14\Command\Job;
 
 use Carbon14\Command\Carbon14Command;
 use Carbon14\Manager\JobManager;
-use Carbon14\Model\FileCollection;
 use Carbon14\Model\Job;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
