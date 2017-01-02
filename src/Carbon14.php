@@ -67,19 +67,17 @@ class Carbon14 extends Application
     {
         $input = new ArgvInput();
         $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'prod');
-        $this->debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(
-            ['--no-debug', '']
-          ) && $env !== 'prod';
+        $this->debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
 
         parent::__construct($name, $version);
 
-//        if ($this->debug) {
-        error_reporting(E_ALL);
-        Debug::enable();
-        ErrorHandler::register();
-        ExceptionHandler::register();
-        DebugClassLoader::enable();
-//        }
+        if ($this->debug) {
+            error_reporting(E_ALL);
+            Debug::enable();
+            ErrorHandler::register();
+            ExceptionHandler::register();
+            DebugClassLoader::enable();
+        }
 
         $this->registerContainer();
         $this->setDispatcher($this->container->get('event_dispatcher'));
