@@ -84,7 +84,7 @@ class CronCommand extends Carbon14Command
     {
         parent::execute($input, $output);
 
-        $settings = $this->getApplication()->getSettings();
+        $settings = $this->getSettings();
         $this->online->setToken($settings['token']);
 
         $safeUuid = $input->getOption('safe');
@@ -143,6 +143,8 @@ class CronCommand extends Carbon14Command
 
         if (isset($credentials['ftp'])) {
             $protocolType = 'ftp';
+        } elseif (isset($credentials['ssh'])) {
+            $protocolType = 'ssh';
         } else {
             throw new \Exception('Protocol not supported');
         }

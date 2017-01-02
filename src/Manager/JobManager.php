@@ -53,9 +53,10 @@ class JobManager
 
     /**
      * @param string $content
+     * @param string $code
      * @return Job
      */
-    public function parse($content)
+    public function parse($content, $code = '')
     {
         $config = Yaml::parse($content);
 
@@ -75,6 +76,7 @@ class JobManager
         $lastExecution = $config['last_execution'] ? new \DateTime($config['last_execution']) : null;
 
         $job = new Job();
+        $job->setCode($code);
         $job->setName($config['name']);
         $job->setDescription($config['description']);
         $job->setStatus($config['status']);
@@ -94,6 +96,7 @@ class JobManager
         $lastExecution = $job->getLastExecution();
 
         $config = [
+          'code' => $job->getCode(),
           'name' => $job->getName(),
           'description' => $job->getDescription(),
           'status' => $job->getStatus(),
@@ -113,7 +116,7 @@ class JobManager
      * @param string $directory
      * @return Job[]
      */
-    public function findFiles($directory)
+    public function loadFiles($directory)
     {
         $fs = new Filesystem();
 
@@ -139,12 +142,8 @@ class JobManager
 
         $jobs = [];
         foreach ($finder as $file) {
-            $job = $this->parse($file->getContents());
-            if (!$job->getName()) {
-                // Use the filename as default job name.
-                $job->setName($file->getBasename('.yml'));
-            }
-            $jobs[] = $job;
+            $job = $this->parse($file->getContents(), $file->getBasename('.yml'));
+            $jobs[$job->getCode()] = $job;
         }
 
         return $jobs;

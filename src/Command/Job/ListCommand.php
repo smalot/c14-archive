@@ -28,13 +28,12 @@ namespace Carbon14\Command\Job;
 
 use Carbon14\Command\Carbon14Command;
 use Carbon14\Manager\JobManager;
+use Carbon14\Model\FileCollection;
 use Carbon14\Model\Job;
-use Smalot\Online\Online;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Finder\Finder;
 
 /**
  * Class ListCommand
@@ -43,18 +42,11 @@ use Symfony\Component\Finder\Finder;
 class ListCommand extends Carbon14Command
 {
     /**
-     * @var Online
-     */
-    protected $online;
-
-    /**
      * @inheritdoc
      */
     public function __construct($name = null)
     {
         parent::__construct($name);
-
-        $this->online = new Online();
     }
 
     /**
@@ -86,7 +78,7 @@ class ListCommand extends Carbon14Command
 
         /** @var JobManager $jobManager */
         $jobManager = $this->get('job_manager');
-        $jobList = $jobManager->findFiles($directory);
+        $jobList = $jobManager->loadFiles($directory);
 
         // Prepare output.
         $rows = [];
@@ -95,6 +87,7 @@ class ListCommand extends Carbon14Command
             $lastExecution = $job->getLastExecution();
 
             $rows[] = [
+              $job->getCode(),
               $job->getName(),
               substr($job->getDescription(), 0, 25),
               $job->getSourceType(),
@@ -106,7 +99,7 @@ class ListCommand extends Carbon14Command
         // Render output.
         $io = new SymfonyStyle($input, $output);
         $io->table(
-          ['name', 'description', 'type', 'status', 'last execution'],
+          ['code', 'name', 'description', 'type', 'status', 'last execution'],
           $rows
         );
     }

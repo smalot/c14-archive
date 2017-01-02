@@ -52,8 +52,6 @@ class File extends SplFileInfo
         } else {
             throw new \InvalidArgumentException('Not supported');
         }
-
-        $this->md5 = md5_file($this->getRealPath());
     }
 
     /**
@@ -61,6 +59,10 @@ class File extends SplFileInfo
      */
     public function getMd5()
     {
+        if (empty($this->md5)) {
+            $this->md5 = md5_file($this->getRealPath());
+        }
+
         return $this->md5;
     }
 }

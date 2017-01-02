@@ -100,7 +100,7 @@ class ListCommand extends Carbon14Command
             $archive = $this->online->storageC14()->getArchiveDetails($safeUuid, $archive['uuid_ref']);
             $created = new \DateTime($archive['creation_date']);
 
-            $bucket = $archive['bucket'];
+            $bucket = isset($archive['bucket']['status']) ? $archive['bucket']['status'] : '';
             $archival = !empty($archive['bucket']['archival_date']) ? new \DateTime(
               $archive['bucket']['archival_date']
             ) : null;
@@ -111,7 +111,7 @@ class ListCommand extends Carbon14Command
               $archive['description'],
               $archive['parity'],
               $created->format('Y-m-d H:i:s'),
-              $bucket['status'],
+              $bucket,
               ($archival ? $archival->format('Y-m-d H:i:s') : ''),
               $archive['status'],
               preg_match('/locked/mis', $archive['description']) ? 'yes' : 'no',

@@ -1,7 +1,7 @@
 services:
-    ##################
-    # Common
-    ##################
+    ###################
+    # Common Commands #
+    ###################
 
     command.init:
         class: Carbon14\Command\InitCommand
@@ -21,9 +21,9 @@ services:
         tags:
           - { name: carbon14.command }
 
-    ##################
-    # Archive
-    ##################
+    ####################
+    # Archive Commands #
+    ####################
 
     command.archive_job_list:
         class: Carbon14\Command\Archive\Job\ListCommand
@@ -67,9 +67,9 @@ services:
         tags:
           - { name: carbon14.command }
 
-    ##################
-    # Job
-    ##################
+    ################
+    # Job Commands #
+    ################
 
     command.job_list:
         class: Carbon14\Command\Job\ListCommand
@@ -77,9 +77,15 @@ services:
         tags:
           - { name: carbon14.command }
 
-    ##################
-    # Safe
-    ##################
+    command.job_run:
+        class: Carbon14\Command\Job\RunCommand
+        private: true
+        tags:
+          - { name: carbon14.command }
+
+    #################
+    # Safe Commands #
+    #################
 
     command.safe_create:
         class: Carbon14\Command\Safe\CreateCommand
@@ -98,4 +104,3 @@ services:
         private: true
         tags:
           - { name: carbon14.command }
-

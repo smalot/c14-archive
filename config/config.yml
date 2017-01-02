@@ -15,3 +15,8 @@ services:
 
     command_manager:
         class: Carbon14\Manager\CommandManager
+
+    job_manager:
+        class: Carbon14\Manager\JobManager
+        arguments:
+          - "@source_manager"
