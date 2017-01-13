@@ -7,9 +7,6 @@ Carbon14
 [![License](https://poser.pugx.org/smalot/carbon14/license)](https://packagist.org/packages/smalot/carbon14)
 [![composer.lock](https://poser.pugx.org/smalot/carbon14/composerlock)](https://packagist.org/packages/smalot/carbon14)
 
-**Table of Contents**
-
-
 
 # Install
 
